@@ -16,10 +16,10 @@ CPPFLAGS = -Wall -Wextra -Werror -g3 $(CPPVERSION) -fsanitize=address -g3
 all: c_dir $(NAME)
 
 $(NAME): $(OBJ)
-	$(CPPC) $(CPPFLAGS) $(OBJ) -o $@
+	$(CPPC) $(CPPFLAGS) $(INCLUDES) $(OBJ) -o $@
 
-$(OBJ_DIR)/%.o: %.cpp
-	$(CPPC) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
+$(OBJ_DIR)/%.o: src/%.cpp
+	$(CPPC) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 c_dir:
 	$(MAKE_DIR) $(OBJ_DIR)
@@ -29,7 +29,6 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
-	rm -f *_shrubbery
 
 re: fclean all
 

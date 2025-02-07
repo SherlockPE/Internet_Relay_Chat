@@ -6,11 +6,11 @@ int main (int argc, char **argv)
 {
 	try
 	{
-		Server	main_serv(argc, argv[2]);
-	
+		Server	main_serv(argc, argv);
 	}
-	catch (std::exception &e) {
-	
+	catch (std::exception &e)
+	{
+		std::cout << RED << "Error\n" << e.what() << NC << std::endl;
 	}
 
 

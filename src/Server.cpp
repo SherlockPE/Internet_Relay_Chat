@@ -1,5 +1,8 @@
 #include <Server.hpp>
 #include <iostream>
+#include <ctype.h>
+#include <cstdlib>
+#include <stdio.h>
 
 // CONSTRUCTORS AND DESTRUCTORS-------------------------------------------------
 // Server::Server(void)
@@ -7,10 +10,9 @@
 // 	std::cout << GREEN "Server default constructor called" NC << std::endl;
 // }
 
-Server::Server(int port, std::string password): m_port(port), m_password(password)
+Server::Server(int argc, char **argv)
 {
-	std::cout << GREEN "Server default constructor called" NC << std::endl;
-	initial_parse();
+	initial_parse(argc, argv);
 }
 
 
@@ -37,8 +39,22 @@ Server& Server::operator=(Server const& other)
 // METHODS AND MEMBER FUNCTIONS-------------------------------------------------
 
 //Parse
-
-void	Server::initial_parse()
+void	Server::initial_parse(int argc, char **argv)
 {
-	if ()
+	if (argc != 3)
+		throw (ErrorExcept("Wrong Arguments"));
+
+	// Port 
+	std::string port = argv[1];
+	for (size_t i = 0; i < port.length(); i++)
+	{
+		if (!isdigit(port[i]))
+			throw (ErrorExcept("The port must be compose by numbers"));
+	}
+	m_port = atoi(port.c_str());
+
+	// Password
+	m_password = argv[2];
+
+	std::cout << GREEN <<  "Access granted" << NC << std::endl;
 }

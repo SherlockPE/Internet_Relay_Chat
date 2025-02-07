@@ -27,7 +27,7 @@ class Server
 
 	public:
 		// CONSTRUCTORS AND DESTRUCTORS---------------------------------------------
-		Server(int port, std::string password);
+		Server(int argc, char **argv);
 		// Server(void);
 		Server(Server const& other);
 		~Server(void);
@@ -35,13 +35,21 @@ class Server
 		// OPERATORS----------------------------------------------------------------
 		Server& operator=(Server const& other);
 
-		void initial_parse();
+		void initial_parse(int argc, char **argv);
 		// METHODS AND MEMBER FUNCTIONS---------------------------------------------
 
-		// class ErrorClass()
-		// {
-
-		// }
+		// EXCEPTION CLASSES -------------------------------------------------------
+		class ErrorExcept : public std::exception
+		{
+			private:
+				const char *_msg;
+			public:
+				ErrorExcept(const char *msg): _msg(msg){};
+				virtual const char * what() const throw ()
+				{
+					return (_msg);
+				}
+		};
 };
 
 #endif // !_SERVER_HPP

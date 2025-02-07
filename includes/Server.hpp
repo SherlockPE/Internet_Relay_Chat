@@ -35,8 +35,9 @@ class Server
 		// OPERATORS----------------------------------------------------------------
 		Server& operator=(Server const& other);
 
-		void initial_parse(int argc, char **argv);
 		// METHODS AND MEMBER FUNCTIONS---------------------------------------------
+		void initial_parse(int argc, char **argv);
+		void init_server(void);
 
 		// EXCEPTION CLASSES -------------------------------------------------------
 		class ErrorExcept : public std::exception

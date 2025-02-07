@@ -7,10 +7,11 @@ int main (int argc, char **argv)
 	try
 	{
 		Server	main_serv(argc, argv);
+		main_serv.init_server();
 	}
 	catch (std::exception &e)
 	{
-		std::cout << RED << "Error\n" << e.what() << NC << std::endl;
+		std::cerr << RED << "Error\n" << e.what() << NC << std::endl;
 	}
 
 

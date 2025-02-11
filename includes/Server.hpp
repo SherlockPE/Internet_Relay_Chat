@@ -18,12 +18,25 @@
 
 #include <iostream>
 
+enum
+{
+	KICK = 1,
+	INVITE = 2,
+	TOPIC = 3,
+	MODE = 4,
+};
 
 class Server
 {
 	private:
 		int m_port;
 		std::string m_password;
+
+		int			_fd_socket;
+		sockaddr	_address;
+		socklen_t	_socket_len;
+
+
 
 	public:
 		// CONSTRUCTORS AND DESTRUCTORS---------------------------------------------

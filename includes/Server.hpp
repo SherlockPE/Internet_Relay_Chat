@@ -17,6 +17,8 @@
 # define _SERVER_HPP
 
 #include <iostream>
+#include <sys/socket.h>
+
 
 enum
 {

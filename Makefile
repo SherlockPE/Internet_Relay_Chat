@@ -2,7 +2,8 @@ NAME = ircserv
 
 OBJ_DIR =	obj
 SOURCES =	main.cpp\
-			Server.cpp
+			Server.cpp\
+			init_server.cpp
 
 MAKE_DIR = mkdir -p
 SRC = $(SOURCES)

@@ -1,60 +1,156 @@
 #include <Server.hpp>
-#include <iostream>
-#include <ctype.h>
-#include <cstdlib>
-#include <stdio.h>
 
-// CONSTRUCTORS AND DESTRUCTORS-------------------------------------------------
-// Server::Server(void)
-// {
-// 	std::cout << GREEN "Server default constructor called" NC << std::endl;
-// }
+// CONSTRUCTOR AND DESTRUCTOR --------------------------------------------------
 
-Server::Server(int argc, char **argv)
+Server::Server(int port, std::string password): _port(port), _password(password)
 {
-	initial_parse(argc, argv);
-}
+	std::cout << GREEN << "Server intializing\n" << NC;
+	std::cout << GREEN << "\n" << NC;
+	std::cout << GREEN << "Port: " << _port << "\n" << NC;
+	std::cout << GREEN << "Password: " << _password << "\n" << NC;
+	std::cout << GREEN << "\n" << NC;
 
+	init_server();
 
-Server::Server(Server const& other)
-{
-	std::cout << GREEN "Server copy constructor called" NC << std::endl;
-	*this = other;
+	std::cout << GREEN << "\n" << NC;
+	std::cout << GREEN << "Server intialized\n" << NC << std::endl;
+
+	server_listen_loop();
 }
 
 Server::~Server(void)
 {
-	std::cout << RED "Server destructor called" NC << std::endl;
+
+	std::cout << YELLOW << "Server closed" << NC << std::endl;
 }
 
-// OPERATORS--------------------------------------------------------------------
-Server& Server::operator=(Server const& other)
+// METHODS AND MEMBER FUNCTIONS ------------------------------------------------
+
+
+// To accept connections, the following steps are performed:
+
+//    (1)  A socket is created with socket().
+//    (2)  The socket is bound to a local address using bind(), so
+//         that other sockets may be connected to it.
+//    (3)  A willingness to accept incoming connections and a queue
+//         limit for incoming connections are specified with
+//         listen().
+//    (4)  The server then enters a loop to accept incoming connections.
+//    (5)  When a connection is accepted, a new socket is created with
+//         accept() and the address of the client is returned.
+//         The server can communicate using the new socket and the
+//         original socket continues to listen for new connections.
+//    (6)  The connection is terminated using close() when finished.
+
+void	Server::init_server(void)
 {
-	if (this == &other)
-		return (*this);
-	// DO THINGS
-	return (*this);
+	int			tcp_socket;
+	sockaddr_in	address;
+
+	tcp_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	if (tcp_socket == -1)
+		throw ErrorExcept("Error trying to display the socket (system error)");
+
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(_port);
+	std::cout << GREEN << "Network port: " << address.sin_port << "\n" << NC;
+
+	if (bind(tcp_socket, (sockaddr *)&address, sizeof(address)) == -1)
+		throw ErrorExcept("Error trying to bind the socket (system error)");
+
+	if (listen(tcp_socket, QUEUE_SIZE) == -1)
+		throw ErrorExcept("Error trying to listen for socket (system error)");
+	
+	pollfd new_pollfd;
+	new_pollfd.fd = tcp_socket;
+	new_pollfd.events = POLLIN;
+	new_pollfd.revents = 0;
+	_pollfds.push_back(new_pollfd);
 }
 
-// METHODS AND MEMBER FUNCTIONS-------------------------------------------------
-
-//Parse
-void	Server::initial_parse(int argc, char **argv)
+void	Server::server_listen_loop(void)
 {
-	if (argc != 3)
-		throw (ErrorExcept("Wrong Arguments"));
-
-	// Port 
-	std::string port = argv[1];
-	for (size_t i = 0; i < port.length(); i++)
+	int			number_of_polls;
+	
+	while (true)
 	{
-		if (!isdigit(port[i]))
-			throw (ErrorExcept("The port must be compose by numbers"));
+		number_of_polls = poll(&_pollfds[0], _pollfds.size(), -1);
+		if (number_of_polls == -1)
+			std::cerr << RED << "Error trying to poll the socket" << NC << std::endl;
+		else if (number_of_polls > 0)
+		{
+			std::cout << MAGENTA << "Number of polls: "<< number_of_polls << NC << "\n";
+			for (size_t i = 0; i < _pollfds.size() && number_of_polls; i++)
+			{
+				if (_pollfds[i].revents & POLLIN)
+				{
+					if (i == 0)
+						server_accept();
+					else
+						server_read(i);
+					number_of_polls--;
+				}
+			}
+		}
 	}
-	m_port = atoi(port.c_str());
+}
 
-	// Password
-	m_password = argv[2];
+void	Server::server_accept(void)
+{
+	int			new_socket;
+	socklen_t	socket_len;
+	sockaddr	address;
+	sockaddr_in	*address_data;
 
-	std::cout << GREEN <<  "Access granted" << NC << std::endl;
+	socket_len = sizeof(sockaddr);
+	new_socket = accept(_pollfds[0].fd, &address, &socket_len);
+	//Using fcntl to make the new socket non-blocking
+	fcntl(new_socket, F_SETFL, O_NONBLOCK);
+	if (new_socket == -1) {
+		std::cerr << RED << "Error trying to accept a new client" << NC << std::endl;
+		return;
+	}
+
+	address_data = (sockaddr_in *)&address;
+	std::cout << GREEN << "New client:\n"
+		<< "fd: " << new_socket << " ip: " << inet_ntoa(address_data->sin_addr)
+		<< " port: " << ntohs(address_data->sin_port)
+		<< NC << "\n";
+	
+	pollfd new_pollfd;
+	new_pollfd.fd = new_socket;
+	new_pollfd.events = POLLIN;
+	new_pollfd.revents = 0;
+	_pollfds.push_back(new_pollfd);
+	_pollfds[0].revents = 0;
+}
+
+void	Server::server_read(size_t i)
+{
+	ssize_t	read;
+
+	//Flag MSG_DONTWAIT if you wnat the operation to be non-blocking
+	// read = recv(_pollfds[i].fd, _buff, BUFF_SIZE, MSG_DONTWAIT);
+	read = recv(_pollfds[i].fd, _buff, BUFF_SIZE, 0);
+	if (read <= 0) {
+		if (read == -1)
+			std::cerr << RED << "Error trying to read from a client" << NC << std::endl;
+		else
+			std::cout << YELLOW << "Client: " << _pollfds[i].fd << "\n" << "Disconected" << NC << "\n";
+		
+		close(_pollfds[i].fd);
+		_pollfds.erase(_pollfds.begin() + i);
+		return;
+	}
+	for (size_t n = 1; n < _pollfds.size(); n++) {
+		if (i == n)
+			continue;
+		// send(_pollfds[n].fd, _buff, read, MSG_DONTWAIT);
+		send(_pollfds[n].fd, _buff, read, 0);
+	}
+	std::cout << CYAN << "Msg from client: " << _pollfds[i].fd << "\n"
+		<< "length = " << read << "\n" << "[ " << _buff << " ]\n" << NC;
+	std::fill_n(_buff, read, 0);
+	_pollfds[i].revents = 0;
 }

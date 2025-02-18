@@ -1,29 +1,35 @@
 NAME = ircserv
 
 OBJ_DIR =	obj
-SOURCES =	main.cpp\
-			Server.cpp\
-			init_server.cpp
+INC_DIR =	includes
+
+SOURCES =	main.cpp \
+			Server.cpp
+
+INCLUDES = Server.hpp
 
 MAKE_DIR = mkdir -p
+
 SRC = $(SOURCES)
 OBJ = $(SRC:.cpp=.o)
 OBJ := $(addprefix $(OBJ_DIR)/, $(OBJ))
 
-INCLUDES := -I includes
-CPPC = c++
-CPPVERSION = -std=c++98
-CPPFLAGS = -Wall -Wextra -Werror -g3 $(CPPVERSION) -fsanitize=address -g3
+INC = $(addprefix $(INC_DIR)/, $(INCLUDES))
 
-all: c_dir $(NAME)
+INCLUDE := -I includes
+CPP = c++
+CPPVER = -std=c++98
+CPPFLAGS = -Wall -Wextra -Werror $(CPPVER) -g3
 
-$(NAME): $(OBJ)
-	$(CPPC) $(CPPFLAGS) $(INCLUDES) $(OBJ) -o $@
+all: $(NAME)
+
+$(NAME): $(INC) $(OBJ_DIR) $(OBJ)
+	$(CPP) $(CPPFLAGS) $(INCLUDE) $(OBJ) -o $@
 
 $(OBJ_DIR)/%.o: src/%.cpp
-	$(CPPC) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
+	$(CPP) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
-c_dir:
+$(OBJ_DIR):
 	$(MAKE_DIR) $(OBJ_DIR)
 
 clean:

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _COLORS
 # define _COLORS
 # define BLACK   "\033[1;30m"
@@ -11,14 +13,24 @@
 # define NC      "\033[0m"
 #endif // !_COLORS
 
-// Server declaration --------------------------------------------------------
+// Server declaration ----------------------------------------------------------
 
 #ifndef _SERVER_HPP
 # define _SERVER_HPP
 
 #include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <vector>
 #include <sys/socket.h>
+#include <poll.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
 
+#define BUFF_SIZE 4096
+#define QUEUE_SIZE 4096
 
 enum
 {
@@ -28,33 +40,43 @@ enum
 	MODE = 4,
 };
 
+template<class T> std::string	to_string(const T& value) {
+	std::ostringstream oss;
+	oss << value;
+	return oss.str();
+}
+
+template<class T> int	to_int(const T& value) {
+	std::stringstream ss;
+	int val;
+	ss << value;
+	ss >> val;
+	return val;
+}
+
 class Server
 {
 	private:
-		int m_port;
-		std::string m_password;
+		int	_port;
+		std::string	_password;
 
-		int			_fd_socket;
-		sockaddr	_address;
-		socklen_t	_socket_len;
+		char	_buff[BUFF_SIZE];
 
+		std::vector<struct pollfd> _pollfds;
 
+		// METHODS AND MEMBER FUNCTIONS ----------------------------------------
+		void init_server(void);
+		void server_listen_loop(void);
+		void server_accept(void);
+		void server_read(size_t i);
 
 	public:
-		// CONSTRUCTORS AND DESTRUCTORS---------------------------------------------
-		Server(int argc, char **argv);
-		// Server(void);
-		Server(Server const& other);
+		// CONSTRUCTOR AND DESTRUCTOR ------------------------------------------
+		Server(int port, std::string password);
 		~Server(void);
 
-		// OPERATORS----------------------------------------------------------------
-		Server& operator=(Server const& other);
 
-		// METHODS AND MEMBER FUNCTIONS---------------------------------------------
-		void initial_parse(int argc, char **argv);
-		void init_server(void);
-
-		// EXCEPTION CLASSES -------------------------------------------------------
+		// EXCEPTION CLASSES ---------------------------------------------------
 		class ErrorExcept : public std::exception
 		{
 			private:
@@ -69,4 +91,3 @@ class Server
 };
 
 #endif // !_SERVER_HPP
-

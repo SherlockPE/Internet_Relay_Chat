@@ -33,3 +33,16 @@ ircserv
 
 # VS Code trash
 .vscode
+
+# -------
+*.pdf
+*.txt
+*.tar
+*.zip
+*.gz
+*.7zip
+*.rar
+*.h
+*.c
+bircd
+obj

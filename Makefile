@@ -3,18 +3,24 @@ NAME = ircserv
 OBJ_DIR =	obj
 INC_DIR =	includes
 
-SOURCES =	main.cpp \
-			Server.cpp
+SOURCES =	main \
+			Server \
+			Channel \
+			Client
 
-INCLUDES = Server.hpp
+INCLUDES =	Server \
+			Channel \
+			Client
 
 MAKE_DIR = mkdir -p
 
-SRC = $(SOURCES)
+SRC = $(addsuffix .cpp, $(SOURCES))
+
 OBJ = $(SRC:.cpp=.o)
 OBJ := $(addprefix $(OBJ_DIR)/, $(OBJ))
 
-INC = $(addprefix $(INC_DIR)/, $(INCLUDES))
+INC = $(addsuffix .hpp, $(INCLUDES))
+INC := $(addprefix $(INC_DIR)/, $(INC))
 
 INCLUDE := -I includes
 CPP = c++

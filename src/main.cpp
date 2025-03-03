@@ -1,4 +1,5 @@
 #include <Server.hpp>
+#include <iostream>
 
 int	exit_error(const char *message, int exit_code)
 {

@@ -18,7 +18,6 @@
 #ifndef _SERVER_HPP
 # define _SERVER_HPP
 
-#include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -28,6 +27,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <Client.hpp>
+#include <Channel.hpp>
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
@@ -63,6 +64,8 @@ class Server
 		char	_buff[BUFF_SIZE];
 
 		std::vector<struct pollfd> _pollfds;
+		std::vector<Client> _clients;
+		std::vector<Channel> _channels;
 
 		// METHODS AND MEMBER FUNCTIONS ----------------------------------------
 		void init_server(void);

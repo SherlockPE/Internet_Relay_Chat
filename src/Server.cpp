@@ -1,4 +1,5 @@
 #include <Server.hpp>
+#include <iostream>
 
 // CONSTRUCTOR AND DESTRUCTOR --------------------------------------------------
 
@@ -99,38 +100,34 @@ void	Server::server_listen_loop(void)
 void	Server::server_accept(void)
 {
 	int			new_socket;
-	socklen_t	socket_len;
 	sockaddr	address;
-	sockaddr_in	*address_data;
+	socklen_t	socket_len = sizeof(sockaddr);
 
-	socket_len = sizeof(sockaddr);
+
 	new_socket = accept(_pollfds[0].fd, &address, &socket_len);
 	//Using fcntl to make the new socket non-blocking
 	fcntl(new_socket, F_SETFL, O_NONBLOCK);
+	_pollfds[0].revents = 0;
 	if (new_socket == -1) {
 		std::cerr << RED << "Error trying to accept a new client" << NC << std::endl;
 		return;
 	}
-
-	address_data = (sockaddr_in *)&address;
-	std::cout << GREEN << "New client:\n"
-		<< "fd: " << new_socket << " ip: " << inet_ntoa(address_data->sin_addr)
-		<< " port: " << ntohs(address_data->sin_port)
-		<< NC << "\n";
 	
 	pollfd new_pollfd;
 	new_pollfd.fd = new_socket;
 	new_pollfd.events = POLLIN;
 	new_pollfd.revents = 0;
+	
 	_pollfds.push_back(new_pollfd);
-	_pollfds[0].revents = 0;
+	
+	_clients.push_back(Client(_pollfds.back(), _pollfds.size(), address));
 }
 
 void	Server::server_read(size_t i)
 {
 	ssize_t	read;
 
-	//Flag MSG_DONTWAIT if you wnat the operation to be non-blocking
+	//Flag MSG_DONTWAIT if you want the operation to be non-blocking
 	// read = recv(_pollfds[i].fd, _buff, BUFF_SIZE, MSG_DONTWAIT);
 	read = recv(_pollfds[i].fd, _buff, BUFF_SIZE, 0);
 	if (read <= 0) {
@@ -141,6 +138,7 @@ void	Server::server_read(size_t i)
 		
 		close(_pollfds[i].fd);
 		_pollfds.erase(_pollfds.begin() + i);
+		_clients.erase(_clients.begin() + i - 1);
 		return;
 	}
 	for (size_t n = 1; n < _pollfds.size(); n++) {

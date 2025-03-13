@@ -28,18 +28,24 @@
 class Client
 {
 	private:
-		struct pollfd	*_poll_data;
+		pollfd		_poll_data;
 		sockaddr	_address;
 		std::string	_nick_name;
 		std::string	_user_name;
-		size_t	_client_id;
+		size_t		_client_id;
 		uint32_t	_auth;
 		uint32_t	_channel_id;
 		uint32_t	_operator;
 
 	public:
-		Client(struct pollfd &poll_data, size_t client_number, sockaddr address);
+		Client(pollfd poll_data, size_t client_number, sockaddr address);
 		~Client(void);
+		Client(const Client &);
+		Client& operator=(const Client &);
+
+		void close_socket(void);
+
+		size_t getId(void) const;
 };
 
 #endif // !_CLIENT_HPP

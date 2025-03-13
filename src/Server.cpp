@@ -12,6 +12,7 @@ Server::Server(int port, std::string password): _port(port), _password(password)
 	std::cout << GREEN << "\n" << NC;
 
 	init_server();
+	_clients_number = 0;
 
 	std::cout << GREEN << "\n" << NC;
 	std::cout << GREEN << "Server intialized\n" << NC << std::endl;
@@ -100,27 +101,33 @@ void	Server::server_listen_loop(void)
 void	Server::server_accept(void)
 {
 	int			new_socket;
+	pollfd		new_pollfd;
 	sockaddr	address;
-	socklen_t	socket_len = sizeof(sockaddr);
+	socklen_t	address_len = sizeof(sockaddr);
 
-
-	new_socket = accept(_pollfds[0].fd, &address, &socket_len);
-	//Using fcntl to make the new socket non-blocking
-	fcntl(new_socket, F_SETFL, O_NONBLOCK);
 	_pollfds[0].revents = 0;
+
+	new_socket = accept(_pollfds[0].fd, &address, &address_len);
 	if (new_socket == -1) {
 		std::cerr << RED << "Error trying to accept a new client" << NC << std::endl;
 		return;
 	}
+	if (address_len != sizeof(address)) {
+		std::cerr << RED << "Error whith the client address" << NC << std::endl;
+		return;
+	}
+	//Using fcntl to make the new socket non-blocking
+	if (fcntl(new_socket, F_SETFL, O_NONBLOCK)) {
+		std::cerr << RED << "Error trying to make a client non-block" << NC << std::endl;
+		return;
+	}
 	
-	pollfd new_pollfd;
 	new_pollfd.fd = new_socket;
 	new_pollfd.events = POLLIN;
 	new_pollfd.revents = 0;
 	
 	_pollfds.push_back(new_pollfd);
-	
-	_clients.push_back(Client(_pollfds.back(), _pollfds.size(), address));
+	_clients.push_back(Client(new_pollfd, ++_clients_number, address));
 }
 
 void	Server::server_read(size_t i)
@@ -133,10 +140,8 @@ void	Server::server_read(size_t i)
 	if (read <= 0) {
 		if (read == -1)
 			std::cerr << RED << "Error trying to read from a client" << NC << std::endl;
-		else
-			std::cout << YELLOW << "Client: " << _pollfds[i].fd << "\n" << "Disconected" << NC << "\n";
 		
-		close(_pollfds[i].fd);
+		_clients[i - 1].close_socket();
 		_pollfds.erase(_pollfds.begin() + i);
 		_clients.erase(_clients.begin() + i - 1);
 		return;

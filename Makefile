@@ -2,14 +2,28 @@ NAME = ircserv
 
 OBJ_DIR =	obj
 INC_DIR =	includes
+SERVER_FOLDER = Server
+UTILS_FOLDER = Utils
+
+SERVER_FILES =  init_server \
+				parse_message \
+				server_accept \
+				Server \
+				server_listen_loop \
+				server_read
+
+UTILS_FILES = str_toupper
+
+SERVER_FILES := $(addprefix $(SERVER_FOLDER)/, $(SERVER_FILES))
+UTILS_FILES := $(addprefix $(UTILS_FOLDER)/, $(UTILS_FILES))
 
 SOURCES =	main \
-			Server \
-			Channel \
+			$(SERVER_FILES) \
+			$(UTILS_FILES) \
 			Client
 
+
 INCLUDES =	Server \
-			Channel \
 			Client
 
 MAKE_DIR = mkdir -p
@@ -36,7 +50,8 @@ $(OBJ_DIR)/%.o: src/%.cpp
 	$(CPP) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
 $(OBJ_DIR):
-	$(MAKE_DIR) $(OBJ_DIR)
+	$(MAKE_DIR) $(OBJ_DIR)/$(SERVER_FOLDER)
+	$(MAKE_DIR) $(OBJ_DIR)/$(UTILS_FOLDER)
 
 clean:
 	rm -rf $(OBJ_DIR)

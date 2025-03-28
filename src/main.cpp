@@ -1,10 +1,17 @@
 #include <Server.hpp>
 #include <iostream>
 
+int usage(int exit_code)
+{
+	std::cout	<< GREEN << "Usage: " << "\n"
+				<< "./ircserv [port] [password]" << std::endl;
+	return (exit_code);
+}
+
 int	exit_error(const char *message, int exit_code)
 {
 	std::cerr << RED << message << NC << std::endl;
-	return exit_code;
+	return (usage(exit_code));
 }
 
 int	main(int argc, char **argv)
@@ -29,7 +36,5 @@ int	main(int argc, char **argv)
 	{
 		std::cerr << RED << "Error\n" << e.what() << NC << std::endl;
 	}
-
-
 	return (EXIT_SUCCESS);
 }

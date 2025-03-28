@@ -18,6 +18,7 @@
 #ifndef _SERVER_HPP
 # define _SERVER_HPP
 
+#include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -28,6 +29,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <Client.hpp>
+#include <string>
 // #include <Channel.hpp>
 
 #define BUFF_SIZE 4096
@@ -58,27 +60,35 @@ template<class T> int	to_int(const T& value) {
 class Server
 {
 	private:
-		int	_port;
+		int			_port;
 		std::string	_password;
+		size_t		_clients_number;
+		char		_buff[BUFF_SIZE];
 
-		char	_buff[BUFF_SIZE];
 
-		size_t _clients_number;
 		std::vector<struct pollfd> _pollfds;
 		std::vector<Client> _clients;
 		// std::vector<Channel> _channels;
 
 		// METHODS AND MEMBER FUNCTIONS ----------------------------------------
-		void init_server(void);
-		void server_listen_loop(void);
-		void server_accept(void);
-		void server_read(size_t i);
+		void	init_server(void);
+		void	server_listen_loop(void);
+		void	server_accept(void);
+		void	server_read(size_t i);
 
+		// Select commands
+		int		select_command(std::string command);
+		int		parse_message(std::string msg);
+
+		// Server commands
+		void    com_KICK(void);
+		void    com_INVITE(void);
+		void    com_TOPIC(void);
+		void    com_MODE(void);
 	public:
 		// CONSTRUCTOR AND DESTRUCTOR ------------------------------------------
 		Server(int port, std::string password);
 		~Server(void);
-
 
 		// EXCEPTION CLASSES ---------------------------------------------------
 		class ErrorExcept : public std::exception
@@ -93,5 +103,9 @@ class Server
 				}
 		};
 };
+
+
+// UTILS
+void str_toupper(std::string &str);
 
 #endif // !_SERVER_HPP

@@ -1,22 +1,22 @@
 #include <Server.hpp>
 #include <cstring>
 
-void    Server::com_KICK(void)
+void    /* Server:: */com_KICK(std::string command)
 {
 
 }
 
-void    Server::com_INVITE(void)
+void    /* Server:: */com_INVITE(std::string command)
 {
 
 }
 
-void    Server::com_TOPIC(void)
+void    /* Server:: */com_TOPIC(std::string command)
 {
 
 }
 
-void    Server::com_MODE(void)
+void    /* Server:: */com_MODE(std::string command)
 {
 
 }
@@ -28,13 +28,13 @@ int	Server::select_command(std::string command)
 	str_toupper(command);
 	std::cout << YELLOW << "Select command function [" << command << "]" << NC << std::endl;
 	if (!strcmp(command.c_str(), "KICK"))
-        std::cout << "You have chossen KICK " << std::endl;
+        com_KICK(command);
 	if (!strcmp(command.c_str(), "INVITE"))
-        std::cout << "You have chossen INVITE" << std::endl;
+        com_INVITE(command);
 	if (!strcmp(command.c_str(), "TOPIC"))
-        std::cout << "You have chossen  TOPIC" << std::endl;
+        com_TOPIC(command);
 	if (!strcmp(command.c_str(), "MODE"))
-        std::cout << "You have chossen MODE " << std::endl;
+        com_MODE(command);
 	return (EXIT_SUCCESS);
 }
 

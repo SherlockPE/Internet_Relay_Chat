@@ -81,10 +81,10 @@ class Server
 		int		parse_message(std::string msg);
 
 		// Server commands
-		void    com_KICK(void);
-		void    com_INVITE(void);
-		void    com_TOPIC(void);
-		void    com_MODE(void);
+		// void    com_KICK(void);
+		// void    com_INVITE(void);
+		// void    com_TOPIC(void);
+		// void    com_MODE(void);
 	public:
 		// CONSTRUCTOR AND DESTRUCTOR ------------------------------------------
 		Server(int port, std::string password);

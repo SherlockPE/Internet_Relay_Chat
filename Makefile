@@ -5,12 +5,15 @@ INC_DIR =	includes
 SERVER_FOLDER = Server
 UTILS_FOLDER = Utils
 
-SERVER_FILES =  init_server \
-				parse_message \
-				server_accept \
-				Server \
+SERVER_FILES =  Server \
+				init_server \
+				init_commands \
 				server_listen_loop \
-				server_read
+				server_accept \
+				server_read \
+				parse_message \
+				client_messages \
+				channel_operations
 
 UTILS_FILES = str_toupper
 

@@ -16,16 +16,15 @@ void	Server::server_read(size_t i)
 		_clients.erase(_clients.begin() + i - 1);
 		return;
 	}
-	if (parse_message(_buff))
-		return;
-	for (size_t n = 1; n < _pollfds.size(); n++) {
-		if (i == n)
-			continue;
-		// send(_pollfds[n].fd, _buff, read, MSG_DONTWAIT);
-		send(_pollfds[n].fd, _buff, read, 0);
-	}
+	// for (size_t n = 1; n < _pollfds.size(); n++) {
+	// 	if (i == n)
+	// 		continue;
+	// 	// send(_pollfds[n].fd, _buff, read, MSG_DONTWAIT);
+	// 	send(_pollfds[n].fd, _buff, read, 0);
+	// }
+	_pollfds[i].revents = 0;
 	std::cout << CYAN << "Msg from client: " << _pollfds[i].fd << "\n"
 		<< "length = " << read << "\n" << "[ " << _buff << " ]\n" << NC;
+	parse_message(_buff, i);
 	std::fill_n(_buff, read, 0);
-	_pollfds[i].revents = 0;
 }

@@ -18,10 +18,12 @@
 #ifndef _SERVER_HPP
 # define _SERVER_HPP
 
+#include <string>
 #include <iostream>
-#include <algorithm>
 #include <sstream>
+#include <algorithm>
 #include <vector>
+#include <map>
 #include <sys/socket.h>
 #include <poll.h>
 #include <unistd.h>
@@ -29,19 +31,10 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <Client.hpp>
-#include <string>
 // #include <Channel.hpp>
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
-
-enum
-{
-	KICK = 1,
-	INVITE = 2,
-	TOPIC = 3,
-	MODE = 4,
-};
 
 template<class T> std::string	to_string(const T& value) {
 	std::ostringstream oss;
@@ -57,6 +50,10 @@ template<class T> int	to_int(const T& value) {
 	return val;
 }
 
+class Server;
+
+typedef void (Server::*com_fn) (std::string command, size_t client_i);
+
 class Server
 {
 	private:
@@ -65,26 +62,39 @@ class Server
 		size_t		_clients_number;
 		char		_buff[BUFF_SIZE];
 
-
 		std::vector<struct pollfd> _pollfds;
 		std::vector<Client> _clients;
 		// std::vector<Channel> _channels;
+
+		std::map<std::string, com_fn>	_coms;
 
 		// METHODS AND MEMBER FUNCTIONS ----------------------------------------
 		void	init_server(void);
 		void	server_listen_loop(void);
 		void	server_accept(void);
 		void	server_read(size_t i);
+		void	init_commands(void);
+		void	select_command(std::string command, size_t client_i);
+		void	parse_message(std::string msg, size_t client_i);
 
-		// Select commands
-		int		select_command(std::string command);
-		int		parse_message(std::string msg);
+		// Client messages
+		void	_PASS(std::string, size_t);
+		void	_NICK(std::string, size_t);
+		void	_USER(std::string, size_t);
+		void	_PING(std::string, size_t);
+		void	_PONG(std::string, size_t);
+		void	_OPER(std::string, size_t);
+		void	_QUIT(std::string, size_t);
+		void	_ERROR(std::string, size_t);
 
-		// Server commands
-		// void    com_KICK(void);
-		// void    com_INVITE(void);
-		// void    com_TOPIC(void);
-		// void    com_MODE(void);
+		// Channel operations
+		void	_JOIN(std::string, size_t);
+		void	_PART(std::string, size_t);
+		void	_KICK(std::string, size_t);
+		void	_INVITE(std::string, size_t);
+		void	_TOPIC(std::string, size_t);
+		void	_MODE(std::string, size_t);
+
 	public:
 		// CONSTRUCTOR AND DESTRUCTOR ------------------------------------------
 		Server(int port, std::string password);

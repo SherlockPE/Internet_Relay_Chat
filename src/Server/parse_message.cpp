@@ -1,57 +1,66 @@
 #include <Server.hpp>
-#include <cstring>
 
-void    /* Server:: */com_KICK(std::string command)
+// void	Server::select_command(std::string command, size_t client_i)
+// {
+// 	str_toupper(command);
+// 	std::cout << YELLOW << "COMMAND: \"" << command << "\"" << NC << "\n";
+
+// 	if (!strcmp(command.c_str(), "KICK "))
+// 		com_KICK(command);
+// 	if (!strcmp(command.c_str(), "INVITE "))
+// 		com_INVITE(command);
+// 	if (!strcmp(command.c_str(), "TOPIC "))
+// 		com_TOPIC(command);
+// 	if (!strcmp(command.c_str(), "MODE "))
+// 		com_MODE(command);
+// 	return;
+// }
+
+void	Server::select_command(std::string command, size_t client_i)
 {
+	std::string	com;
+	size_t	com_pos;
+	std::map<std::string, com_fn>::iterator it;
+	
+	std::cout << YELLOW << "MESSAGE: \"" << command << "\"" << NC << "\n";
 
+	com_pos = command.find(" ");
+	com = command.substr(0, com_pos);
+	if (com_pos != std::string::npos)
+		com_pos++;
+	command.erase(0, com_pos);
+	
+	std::cout << YELLOW << "COMMAND: \"" << com << "\"" << NC << "\n";
+
+	it = _coms.find(com);
+	if (it == _coms.end())
+		return;
+
+	std::cout << GREEN << "COMMAND FOUND: \"" << com << "\"" << NC << "\n";
+
+	(this->*(it->second))(command, client_i);
 }
 
-void    /* Server:: */com_INVITE(std::string command)
+void	Server::parse_message(std::string msg, size_t client_i)
 {
+	std::string	command;
+	size_t	msg_pos;
+	// size_t	com_pos;
 
-}
-
-void    /* Server:: */com_TOPIC(std::string command)
-{
-
-}
-
-void    /* Server:: */com_MODE(std::string command)
-{
-
-}
-
-
-
-int	Server::select_command(std::string command)
-{
-	str_toupper(command);
-	std::cout << YELLOW << "Select command function [" << command << "]" << NC << std::endl;
-	if (!strcmp(command.c_str(), "KICK"))
-        com_KICK(command);
-	if (!strcmp(command.c_str(), "INVITE"))
-        com_INVITE(command);
-	if (!strcmp(command.c_str(), "TOPIC"))
-        com_TOPIC(command);
-	if (!strcmp(command.c_str(), "MODE"))
-        com_MODE(command);
-	return (EXIT_SUCCESS);
-}
-
-
-int	Server::parse_message(std::string msg)
-{
-	for (size_t i = 0; i < msg.length(); i++)
+	while (!msg.empty() || msg != "\r\n")
 	{
-		while (strchr(" \n\t", msg[i]))
-			i++;
-		if (msg[i] == '/')
-		{
-			i++;
-			if (select_command(&msg[i]))
-				return (EXIT_FAILURE);
-		}
+		msg_pos = msg.find("\r\n");
+
+		if (msg_pos == std::string::npos)
+			return;
+
+		command = msg.substr(0, msg_pos);
+		msg.erase(0, msg_pos + 2);
+
+		select_command(command, client_i);
+		// com_pos = command.find_first_not_of(" \n\t");
+		// if (com_pos != std::string::npos)
+		// 	select_command(command.substr(com_pos));
 	}
-	return (EXIT_SUCCESS);
 }
 

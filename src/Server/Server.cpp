@@ -15,6 +15,8 @@ Server::Server(int port, std::string password): _port(port), _password(password)
 	init_server();
 	_clients_number = 0;
 
+	init_commands();
+
 	std::cout << GREEN << "\nServer intialized\n" << NC << std::endl;
 	server_listen_loop();
 }

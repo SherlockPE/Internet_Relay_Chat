@@ -30,4 +30,5 @@ void	Server::server_accept(void)
 	
 	_pollfds.push_back(new_pollfd);
 	_clients.push_back(Client(new_pollfd, ++_clients_number, address));
+	_clients_to_auth++;
 }

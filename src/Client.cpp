@@ -12,6 +12,8 @@ Client::Client(pollfd poll_data, size_t client_number, sockaddr address)
 		<< "]\n-> port: [" << ntohs(address_data->sin_port)
 		<< "]\n-> ip: [" << inet_ntoa(address_data->sin_addr)
 		<< "]\n" << NC;
+	
+	_registered = false;
 }
 
 Client::~Client(void) {}
@@ -29,7 +31,8 @@ Client& Client::operator=(const Client &other)
 	_nick_name = other._nick_name;
 	_user_name = other._user_name;
 	_client_id = other._client_id;
-	_auth = other._auth;
+	// _auth = other._auth;
+	_registered = other._registered;
 	_channel_id = other._channel_id;
 	_operator = other._operator;
 
@@ -49,3 +52,48 @@ size_t Client::getId(void) const
 {
 	return _client_id;
 }
+std::string	Client::getNick(void) const
+{
+	return _nick_name;
+}
+bool Client::getReg(void) const
+{
+	return _registered;
+}
+
+void	Client::setPass(const std::string &new_pass)
+{
+	_password = new_pass;
+}
+void	Client::setNick(const std::string &new_nick)
+{
+	_nick_name = new_nick;
+}
+void	Client::setUser(const std::string &new_user)
+{
+	_user_name = new_user;
+}
+
+bool	Client::_register(void)
+{
+	std::string	msg;
+
+	if (_user_name.empty() || _nick_name.empty() || _password.empty())
+		return false;
+	std::cout << YELLOW << "Client [" << _nick_name << "]: "
+		<< "Registered" << NC << "\n";
+	_registered = true;
+	msg = "001" + _nick_name + ":Welcome " + _nick_name;
+	send(_poll_data.fd, msg.c_str(), msg.size(), 0);
+	return true;
+}
+// bool	Client::_register(const std::string &password, const std::vector<std::string> &clients_nicks)
+// {
+// 	if (password != _password)
+// 	{
+// 		// ERR_PASSWDMISMATCH (464)
+// 		return false;
+// 	}
+// 	_registered = true;
+// 	return true;
+// }

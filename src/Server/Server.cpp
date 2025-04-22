@@ -14,6 +14,7 @@ Server::Server(int port, std::string password): _port(port), _password(password)
 
 	init_server();
 	_clients_number = 0;
+	_clients_to_auth = 0;
 
 	init_commands();
 

@@ -21,6 +21,9 @@ void	Server::server_listen_loop(void)
 					else
 						server_read(i);
 					number_of_polls--;
+
+					if (_clients_to_auth)
+						register_clients();
 				}
 			}
 		}

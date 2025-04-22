@@ -37,8 +37,9 @@ void	Server::select_command(std::string command, size_t client_i)
 		return;
 
 	std::cout << GREEN << "COMMAND FOUND: \"" << com << "\"" << NC << "\n";
+	std::cout << GREEN << "COMMAND PARAMS: \"" << command << "\"" << NC << "\n";
 
-	(this->*(it->second))(command, client_i);
+	(this->*(it->second))(com, command, client_i);
 }
 
 void	Server::parse_message(std::string msg, size_t client_i)

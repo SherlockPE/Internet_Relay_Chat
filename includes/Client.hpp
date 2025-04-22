@@ -19,6 +19,8 @@
 # define _CLIENT_HPP
 
 #include <string>
+#include <vector>
+#include <algorithm>
 #include <unistd.h>
 #include <poll.h>
 #include <sys/socket.h>
@@ -30,12 +32,14 @@ class Client
 	private:
 		pollfd		_poll_data;
 		sockaddr	_address;
+		std::string	_password;
 		std::string	_nick_name;
 		std::string	_user_name;
 		size_t		_client_id;
-		uint32_t	_auth;
 		uint32_t	_channel_id;
 		uint32_t	_operator;
+		bool	_registered;
+		// uint32_t	_auth;
 
 	public:
 		Client(pollfd poll_data, size_t client_number, sockaddr address);
@@ -46,6 +50,15 @@ class Client
 		void close_socket(void);
 
 		size_t getId(void) const;
+		std::string getNick(void) const;
+		bool getReg(void) const;
+
+		void	setPass(const std::string &);
+		void	setNick(const std::string &);
+		void	setUser(const std::string &);
+
+		// bool	_register(const std::string &password, const std::vector<std::string> &client_nicks);
+		bool	_register(void);
 };
 
 #endif // !_CLIENT_HPP

@@ -25,6 +25,6 @@ void	Server::server_read(size_t i)
 	_pollfds[i].revents = 0;
 	std::cout << CYAN << "Msg from client: " << _pollfds[i].fd << "\n"
 		<< "length = " << read << "\n" << "[ " << _buff << " ]\n" << NC;
-	parse_message(_buff, i);
+	parse_message(_buff, i - 1);
 	std::fill_n(_buff, read, 0);
 }

@@ -52,7 +52,7 @@ template<class T> int	to_int(const T& value) {
 
 class Server;
 
-typedef void (Server::*com_fn) (std::string command, size_t client_i);
+typedef void (Server::*com_fn) (std::string command, std::string params, size_t client_i);
 
 class Server
 {
@@ -60,10 +60,12 @@ class Server
 		int			_port;
 		std::string	_password;
 		size_t		_clients_number;
+		size_t		_clients_to_auth;
 		char		_buff[BUFF_SIZE];
 
 		std::vector<struct pollfd> _pollfds;
 		std::vector<Client> _clients;
+		std::vector<std::string> _client_nicks;
 		// std::vector<Channel> _channels;
 
 		std::map<std::string, com_fn>	_coms;
@@ -76,24 +78,29 @@ class Server
 		void	init_commands(void);
 		void	select_command(std::string command, size_t client_i);
 		void	parse_message(std::string msg, size_t client_i);
+		void	register_clients(void);
 
-		// Client messages
-		void	_PASS(std::string, size_t);
-		void	_NICK(std::string, size_t);
-		void	_USER(std::string, size_t);
-		void	_PING(std::string, size_t);
-		void	_PONG(std::string, size_t);
-		void	_OPER(std::string, size_t);
-		void	_QUIT(std::string, size_t);
-		void	_ERROR(std::string, size_t);
+		// Connection messages
+		void	_PASS(std::string, std::string, size_t);
+		void	_NICK(std::string, std::string, size_t);
+		void	_USER(std::string, std::string, size_t);
+		// void	_PING(std::string, std::string, size_t);
+		// void	_PONG(std::string, std::string, size_t);
+		void	_OPER(std::string, std::string, size_t);
+		// void	_QUIT(std::string, std::string, size_t);
+		// void	_ERROR(std::string, std::string, size_t);
 
 		// Channel operations
-		void	_JOIN(std::string, size_t);
-		void	_PART(std::string, size_t);
-		void	_KICK(std::string, size_t);
-		void	_INVITE(std::string, size_t);
-		void	_TOPIC(std::string, size_t);
-		void	_MODE(std::string, size_t);
+		void	_JOIN(std::string, std::string, size_t);
+		// void	_PART(std::string, std::string, size_t);
+		void	_KICK(std::string, std::string, size_t);
+		void	_INVITE(std::string, std::string, size_t);
+		void	_TOPIC(std::string, std::string, size_t);
+		void	_MODE(std::string, std::string, size_t);
+
+		// Messages
+		void	_PRIVMSG(std::string, std::string, size_t);
+		// void	_NOTICE(std::string, std::string, size_t);
 
 	public:
 		// CONSTRUCTOR AND DESTRUCTOR ------------------------------------------

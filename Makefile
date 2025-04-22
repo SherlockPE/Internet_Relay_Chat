@@ -12,8 +12,10 @@ SERVER_FILES =  Server \
 				server_accept \
 				server_read \
 				parse_message \
-				client_messages \
-				channel_operations
+				connection_messages \
+				register_clients \
+				channel_operations \
+				messages
 
 UTILS_FILES = str_toupper
 

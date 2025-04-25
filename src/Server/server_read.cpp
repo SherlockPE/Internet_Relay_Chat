@@ -12,6 +12,10 @@ void	Server::server_read(size_t i)
 			std::cerr << RED << "Error trying to read from a client" << NC << std::endl;
 		
 		_clients[i - 1].close_socket();
+		std::string	nick = _clients[i - 1].getNick();
+		std::vector<std::string>::iterator it = std::find(_client_nicks.begin(), _client_nicks.end(), nick);
+		if (it != _client_nicks.end())
+			_client_nicks.erase(it);
 		_pollfds.erase(_pollfds.begin() + i);
 		_clients.erase(_clients.begin() + i - 1);
 		return;

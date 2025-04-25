@@ -83,8 +83,8 @@ bool	Client::_register(void)
 	std::cout << YELLOW << "Client [" << _nick_name << "]: "
 		<< "Registered" << NC << "\n";
 	_registered = true;
-	msg = "001" + _nick_name + ":Welcome " + _nick_name;
-	send(_poll_data.fd, msg.c_str(), msg.size(), 0);
+	msg = "001 " + _nick_name + " :Welcome " + _nick_name;
+	std::cout  << WHITE << "BYTES SENT TO CLIENT [" << _poll_data.fd << "]: " << send(_poll_data.fd, msg.c_str(), msg.size(), 0) << NC << "\n";
 	return true;
 }
 // bool	Client::_register(const std::string &password, const std::vector<std::string> &clients_nicks)

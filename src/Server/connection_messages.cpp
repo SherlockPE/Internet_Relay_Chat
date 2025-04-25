@@ -62,7 +62,14 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
 		return;
 	}
-	_clients[client_i].setUser(params);
+
+	std::string	username = params.substr(0, params.find(" "));
+	std::string	realname = params.substr(params.find(":"));
+
+	if (realname == "realname")
+		realname = username;
+
+	_clients[client_i].setUser(username);
 }
 
 // void	Server::_PING(std::string command, std::string params, size_t client_i)

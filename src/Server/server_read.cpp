@@ -16,6 +16,8 @@ void	Server::server_read(size_t i)
 		std::vector<std::string>::iterator it = std::find(_client_nicks.begin(), _client_nicks.end(), nick);
 		if (it != _client_nicks.end())
 			_client_nicks.erase(it);
+		if (!_clients[i - 1].getReg())
+				_clients_to_auth--;
 		_pollfds.erase(_pollfds.begin() + i);
 		_clients.erase(_clients.begin() + i - 1);
 		return;

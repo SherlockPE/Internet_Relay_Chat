@@ -35,30 +35,27 @@ class Client
 		std::string	_password;
 		std::string	_nick_name;
 		std::string	_user_name;
-		size_t		_client_id;
-		uint32_t	_channel_id;
-		uint32_t	_operator;
+		std::string	_real_name;
 		bool	_registered;
-		// uint32_t	_auth;
+
 
 	public:
-		Client(pollfd poll_data, size_t client_number, sockaddr address);
+		Client(pollfd poll_data, sockaddr address);
 		~Client(void);
 		Client(const Client &);
 		Client& operator=(const Client &);
 
 		void close_socket(void);
 
-		size_t getId(void) const;
 		std::string getNick(void) const;
 		bool getReg(void) const;
 
 		void	setPass(const std::string &);
 		void	setNick(const std::string &);
 		void	setUser(const std::string &);
+		void	setRealName(const std::string &);
 
-		// bool	_register(const std::string &password, const std::vector<std::string> &client_nicks);
-		bool	_register(const std::vector<std::string> &);
+		bool	_register(const std::vector<std::string> &client_nicks);
 };
 
 #endif // !_CLIENT_HPP

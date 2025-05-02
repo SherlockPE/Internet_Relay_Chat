@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <Client.hpp>
-// #include <Channel.hpp>
+#include <Channel.hpp>
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
@@ -64,14 +64,13 @@ class Server
 		struct tm	*_init_time;
 		std::string	_time_str;
 		std::string	_password;
-		size_t		_clients_number;
 		size_t		_clients_to_auth;
 		char		_buff[BUFF_SIZE];
 
 		std::vector<struct pollfd> _pollfds;
 		std::vector<Client> _clients;
 		std::vector<std::string> _client_nicks;
-		// std::vector<Channel> _channels;
+		std::vector<Channel> _channels;
 
 		std::map<std::string, com_fn>	_coms;
 

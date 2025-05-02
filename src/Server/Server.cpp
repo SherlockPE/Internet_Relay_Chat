@@ -19,7 +19,6 @@ Server::Server(int port, std::string password): _port(port), _password(password)
 	std::cout << GREEN << "Server init time (UTC+0): " << _time_str << "\n" << NC;
 
 	init_server();
-	_clients_number = 0;
 	_clients_to_auth = 0;
 
 	std::cout << GREEN << "\nServer intialized:\n"

@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <unistd.h>
 #include <poll.h>
 #include <sys/socket.h>
@@ -32,18 +33,28 @@ class Channel
 		std::string	_channel_name;
 		std::string	_password;
 		std::string	_topic;
-		std::vector<uint32_t>	_members;
-		std::vector<uint32_t>	_operators;
-		uint32_t	_channel_id;
+		std::vector<std::string>	_members;
+		std::vector<std::string>	_operators;
 		uint32_t	_invite_type;
 		uint32_t	_user_limit;
+		uint32_t	_channel_type;
 
 	public:
-		Channel(void);
-		Channel(Channel const& other);
+		Channel(const std::string &channel_name, const std::string &channel_pass);
+		Channel(const Channel & other);
 		~Channel(void);
 
-  		Channel& operator=(Channel const& other);
+  		Channel& operator=(const Channel & other);
+
+
+		std::string getName(void);
+		std::string getPass(void);
+		std::string getTopic(void);
+
+		void addMember(std::string client_nick);
+		void addOperator(std::string client_nick);
+
+		bool isMember(std::string client_nick);
 };
 
 #endif // !_CHANNEL_HPP

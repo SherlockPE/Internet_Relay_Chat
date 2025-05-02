@@ -25,7 +25,8 @@ UTILS_FILES := $(addprefix $(UTILS_FOLDER)/, $(UTILS_FILES))
 SOURCES =	main \
 			$(SERVER_FILES) \
 			$(UTILS_FILES) \
-			Client
+			Client \
+			Channel
 
 
 INCLUDES =	Server \

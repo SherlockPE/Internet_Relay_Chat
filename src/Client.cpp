@@ -74,17 +74,18 @@ void	Client::setUser(const std::string &new_user)
 	_user_name = new_user;
 }
 
-bool	Client::_register(void)
+bool	Client::_register(const std::vector<std::string> &client_nicks)
 {
-	std::string	msg;
-
 	if (_user_name.empty() || _nick_name.empty() || _password.empty())
 		return false;
+	if (std::find(client_nicks.begin(), client_nicks.end(), _nick_name) != client_nicks.end())
+	{
+		std::cout << RED << "ERR_NICKNAMEINUSE (433)" << NC << "\n";
+		return false;
+	}
 	std::cout << YELLOW << "Client [" << _nick_name << "]: "
 		<< "Registered" << NC << "\n";
 	_registered = true;
-	msg = "001 " + _nick_name + " :Welcome " + _nick_name;
-	std::cout  << WHITE << "BYTES SENT TO CLIENT [" << _poll_data.fd << "]: " << send(_poll_data.fd, msg.c_str(), msg.size(), 0) << NC << "\n";
 	return true;
 }
 // bool	Client::_register(const std::string &password, const std::vector<std::string> &clients_nicks)

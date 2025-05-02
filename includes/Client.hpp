@@ -58,7 +58,7 @@ class Client
 		void	setUser(const std::string &);
 
 		// bool	_register(const std::string &password, const std::vector<std::string> &client_nicks);
-		bool	_register(void);
+		bool	_register(const std::vector<std::string> &);
 };
 
 #endif // !_CLIENT_HPP

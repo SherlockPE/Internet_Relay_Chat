@@ -43,4 +43,5 @@ void	Server::init_server(void)
 	new_pollfd.events = POLLIN;
 	new_pollfd.revents = 0;
 	_pollfds.push_back(new_pollfd);
+	_address = address;
 }

@@ -24,7 +24,7 @@ void	Server::select_command(std::string command, size_t client_i)
 	
 	std::cout << YELLOW << "MESSAGE: \"" << command << "\"" << NC << "\n";
 
-	com_pos = command.find(" ");
+	com_pos = command.find(' ');
 	com = command.substr(0, com_pos);
 	if (com_pos != std::string::npos)
 		com_pos++;

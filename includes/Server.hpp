@@ -20,6 +20,7 @@
 
 #include <string>
 #include <iostream>
+#include <ctime>
 #include <sstream>
 #include <algorithm>
 #include <vector>
@@ -58,6 +59,10 @@ class Server
 {
 	private:
 		int			_port;
+		sockaddr_in	_address;
+		time_t		_init_timer;
+		struct tm	*_init_time;
+		std::string	_time_str;
 		std::string	_password;
 		size_t		_clients_number;
 		size_t		_clients_to_auth;

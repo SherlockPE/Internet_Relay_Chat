@@ -10,21 +10,21 @@ void	Server::_PASS(std::string command, std::string params, size_t client_i)
 	if (_clients[client_i].getReg())
 	{
 		std::cout << RED << command << " ERR_ALREADYREGISTERED (462)" << NC << "\n";
-		msg = ":42.irc 462" + client_nick + " :You may not reregister\r\n";
+		msg = ":42.irc 462 " + client_nick + " :You may not reregister\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	if (params.empty())
 	{
 		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
-		msg = ":42.irc 461" + client_nick + " " + command + " :Not enough parameters\r\n";
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	if (params != _password)
 	{
 		std::cout << RED << command << " ERR_PASSWDMISMATCH (464)" << NC << "\n";
-		msg = ":42.irc 464" + client_nick + " :Password incorrect\r\n";
+		msg = ":42.irc 464 " + client_nick + " :Password incorrect\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
@@ -38,38 +38,31 @@ void	Server::_NICK(std::string command, std::string params, size_t client_i)
 
 	std::cout << GREEN << "Executing _NICK" << NC << "\n";
 
-	if (_clients[client_i].getReg())
-	{
-		std::cout << RED << command << " ERR_ALREADYREGISTERED (462)" << NC << "\n";
-		msg = ":42.irc 462" + client_nick + " :You may not reregister\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
-		return;
-	}
 	if (params.empty())
 	{
 		std::cout << RED << command << " ERR_NONICKNAMEGIVEN (431)" << NC << "\n";
-		msg = ":42.irc 431" + client_nick + " :No nickname given\r\n";
+		msg = ":42.irc 431 " + client_nick + " :No nickname given\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
-	// find invalid chars
 	if (params.find("=#&%$@:") != std::string::npos)
 	{
 		std::cout << RED << command << " ERR_ERRONEUSNICKNAME (432)" << NC << "\n";
-		msg = ":42.irc 432" + client_nick + " " + client_nick + " :Erroneus nickname\r\n";
+		msg = ":42.irc 432 " + client_nick + " " + client_nick + " :Erroneus nickname\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	if (std::find(_client_nicks.begin(), _client_nicks.end(), params) != _client_nicks.end())
 	{
 		std::cout << RED << command << " ERR_NICKNAMEINUSE (433)" << NC << "\n";
-		msg = ":42.irc 433" + client_nick + " " + client_nick + " :Nickname is already in use\r\n";
+		msg = ":42.irc 433 " + client_nick + " " + client_nick + " :Nickname is already in use\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	_clients[client_i].setNick(params);
 }
 
+// TODO: parse the user params (optional)
 void	Server::_USER(std::string command, std::string params, size_t client_i)
 {
 	std::string	msg;
@@ -80,14 +73,14 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 	if (_clients[client_i].getReg())
 	{
 		std::cout << RED << command << " ERR_ALREADYREGISTERED (462)" << NC << "\n";
-		msg = ":42.irc 462" + client_nick + " :You may not reregister\r\n";
+		msg = ":42.irc 462 " + client_nick + " :You may not reregister\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	if (params.empty())
 	{
 		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
-		msg = ":42.irc 461" + client_nick + " " + command + " :Not enough parameters\r\n";
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
@@ -118,6 +111,7 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 //	std::cout << GREEN << "Executing _PONG" << NC << "\n";
 // }
 
+//TODO: Will this message be needed? (optional)
 void	Server::_OPER(std::string command, std::string params, size_t client_i)
 {
 	(void)command;

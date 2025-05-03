@@ -1,5 +1,6 @@
 #include <Server.hpp>
 
+// TODO: improve parsing of the params (optional)
 void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 {
 	std::string	dest;
@@ -15,19 +16,19 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 		return;
 	}
 	if (params.empty()) {
-		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		std::cout << RED << command << " ERR_NORECIPIENT (411)" << NC << "\n";
+		msg = ":42.irc 411 " + client_nick + " :No recipient given (" + command + ")\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 	dest_pos = params.find(' ');
-	dest = params.substr(0, dest_pos);
 	if (dest_pos == std::string::npos) {
-		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		std::cout << RED << command << " ERR_NOTEXTTOSEND (412)" << NC << "\n";
+		msg = ":42.irc 412 " + client_nick + " :No text to send\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
+	dest = params.substr(0, dest_pos);
 	if (dest[0] == '#') {
 		for (size_t i = 0; i < _channels.size(); i++) {
 			if (_channels[i].getName() == dest) {
@@ -45,6 +46,9 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 				return;
 			}
 		}
+		std::cout << RED << command << "  ERR_NOSUCHCHANNEL (403)" << NC << "\n";
+		msg = ":42.irc 403 " + client_nick + " " + dest + " :No such channel\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 	}
 	else {
 		for (size_t i = 0; i < _clients.size(); i++) {
@@ -54,10 +58,10 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 				return;
 			}
 		}
+		std::cout << RED << command << "  ERR_NOSUCHNICK (401)" << NC << "\n";
+		msg = ":42.irc 401 " + client_nick + " " + dest + " :No such nick\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 	}
-	std::cout << RED << command << "  ERR_NOSUCHNICK (401)" << NC << "\n";
-	msg = ":42.irc 401 " + client_nick + " " + dest + " :No such nick/channel\r\n";
-	send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 }
 
 // void	Server::_NOTICE(std::string command, std::string params, size_t client_i)

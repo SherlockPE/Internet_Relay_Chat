@@ -22,9 +22,16 @@ void	Server::server_listen_loop(void)
 						server_read(i);
 					number_of_polls--;
 
-					if (_clients_to_auth)
-						register_clients();
 				}
+			}
+			if (_clients_to_auth)
+				register_clients();
+			for (size_t i = 0; i < _channels.size();) {
+				if (_channels[i].isEmpty()) {
+					_channels.erase(_channels.begin() + i);
+					continue;
+				}
+				i++;
 			}
 		}
 	}

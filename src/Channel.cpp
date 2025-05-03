@@ -60,11 +60,38 @@ void	Channel::addOperator(std::string client_nick)
 	_operators.push_back(client_nick);
 }
 
+void	Channel::erraseMember(std::string client_nick)
+{
+	std::vector<std::string>::iterator	it;
+	it = std::find(_members.begin(), _members.end(), client_nick);
+	if (it == _members.end())
+		return;
+	_members.erase(it);
+	it = std::find(_operators.begin(), _operators.end(), client_nick);
+	if (it == _operators.end())
+		return;
+	_operators.erase(it);
+}
+
 bool	Channel::isMember(std::string client_nick)
 {
 	std::vector<std::string>::iterator	it;
 	it = std::find(_members.begin(), _members.end(), client_nick);
 	if (it != _members.end())
+		return true;
+	return false;
+}
+bool	Channel::isOperator(std::string client_nick)
+{
+	std::vector<std::string>::iterator	it;
+	it = std::find(_operators.begin(), _operators.end(), client_nick);
+	if (it != _operators.end())
+		return true;
+	return false;
+}
+bool	Channel::isEmpty(void)
+{
+	if (_members.empty() && _operators.empty())
 		return true;
 	return false;
 }

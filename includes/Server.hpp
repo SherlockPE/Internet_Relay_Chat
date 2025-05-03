@@ -78,7 +78,7 @@ class Server
 		void	init_server(void);
 		void	server_listen_loop(void);
 		void	server_accept(void);
-		void	server_read(size_t i);
+		void	server_read(size_t poll_i);
 		void	init_commands(void);
 		void	select_command(std::string command, size_t client_i);
 		void	parse_message(std::string msg, size_t client_i);

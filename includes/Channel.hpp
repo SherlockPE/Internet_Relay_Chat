@@ -53,8 +53,12 @@ class Channel
 
 		void addMember(std::string client_nick);
 		void addOperator(std::string client_nick);
+		
+		void erraseMember(std::string client_nick);
 
 		bool isMember(std::string client_nick);
+		bool isOperator(std::string client_nick);
+		bool isEmpty(void);
 };
 
 #endif // !_CHANNEL_HPP

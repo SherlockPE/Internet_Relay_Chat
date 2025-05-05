@@ -4,9 +4,37 @@
 // TODO: Eject a client from the channel
 void	Server::_KICK(std::string command, std::string params, size_t client_i)
 {
-	(void)command;
-	(void)params;
-	(void)client_i;
+	std::string msg; 
+	std::string dest_chan;
+	std::string client_target;
+
+	size_t pos = params.find(' ');
+	if (pos == std::string::npos)
+		return ;
+	dest_chan = params.substr(0, pos); // <-- Canal de destino
+	params.erase(0, pos + 1)
+	
+	pos = params.find(' ');
+	if (pos == std::string::npos)
+		return ;
+	client_target = params.substr(0, pos) // <-- Objetivo del ban :D
+	params.erase(0, pos + 1)
+
+	std::string	client_nick = _clients[client_i].getNick();
+
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if ((_channels[i].getName() == dest_chan))
+		{
+			if (_channels[i].isOperator(client_nick))
+			{
+				_channels[i].erraseMember(client_target);
+				return ;
+			}
+			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator";
+			send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		}
+	}
 	std::cout << ITALIC MAGENTA "Usage: KICK <nick> [reason], kicks the nick from the current channel (needs chanop)";
 	std::cout << GREEN << "Executing _KICK" << NC << "\n";
 }
@@ -65,7 +93,8 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 	size_t	keys_pos;
 	std::string	msg;
 	std::string	client_nick = _clients[client_i].getNick();
-
+	bool	is_key;
+	
 	std::cout << GREEN << "Executing _JOIN" << NC << "\n";
 	if (!_clients[client_i].getReg())
 	{
@@ -92,6 +121,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 
 	while (!channel_names.empty())
 	{
+		is_key = false;
 		names_pos = channel_names.find(',');
 		name = channel_names.substr(0, names_pos);
 		if (names_pos != std::string::npos)
@@ -104,6 +134,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 			if (keys_pos != std::string::npos)
 				keys_pos++;
 			channel_keys.erase(0, keys_pos);
+			is_key = true;
 		}
 		if (name[0] != '#')
 		{
@@ -112,7 +143,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 			send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 			continue;
 		}
-		if (!channel_keys.empty())
+		if (is_key)
 			channel_names_keys[name] = key;
 		else
 			channel_names_keys[name];
@@ -129,7 +160,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 			if (it->first == _channels[i].getName()) {
 				if (_channels[i].isMember(client_nick))
 					std::cout << RED << "Channel " << it->first << " already joined" << NC << "\n";
-				else if (_channels[i].getPass() == it->second)
+				else if (_channels[i].getPass().empty() || _channels[i].getPass() == it->second)
 				{
 					_channels[i].addMember(client_nick);
 					msg = ":" + client_nick + " JOIN " + it->first + "\r\n";

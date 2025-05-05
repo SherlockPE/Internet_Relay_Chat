@@ -18,7 +18,8 @@ void	Server::register_clients(void)
 			_clients_to_auth--;
 			std::cout << " RPL_WELCOME (001)\n RPL_YOURHOST (002)\n"
 			<< " RPL_CREATED (003)\n RPL_MYINFO (004)\n RPL_ISUPPORT (005)\n";
-			msg = ":42.irc 001 " + nick_name + " :Welcome " + nick_name + "\r\n";
+			msg = "\\▄▖              \n▐ ▛▘▛▘          \n▟▖▌ ▙▖          \n                \n▌               \n▛▌▌▌            \n▙▌▙▌            \n  ▄▌            \n▄▖▜ ▌     ▗   ▜ \n▌▌▐ ▛▌▀▌▛▘▜▘▛▌▐ \n▛▌▐▖▙▌█▌▌ ▐▖▙▌▐▖\n                \n      ▗ ▗       \n      ▚▘▚▘      \n      ▚▌▚▌      \n                \n▐▘▜             \n▜▘▐ ▛▌▛▌█▌▀▌▄▖▛▘\n▐ ▐▖▙▌▙▌▙▖▙▖  ▌ \n      ▌         \n";
+			msg += ":42.irc 001 " + nick_name + " :Welcome " + nick_name + "\r\n";
 			msg += ":42.irc 002 " + nick_name + " :Your host is 42_IRC, running version 0.1" + "\r\n";
 			msg += ":42.irc 003 " + nick_name + " :This server was created " + _time_str + "\r\n";
 			msg += ":42.irc 004 " + nick_name + " 42_IRC 0.1\r\n";

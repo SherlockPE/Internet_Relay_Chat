@@ -7,20 +7,30 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	std::string msg; 
 	std::string dest_chan;
 	std::string client_target;
+	std::string	client_nick = _clients[client_i].getNick();
 
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
 		return ;
 	dest_chan = params.substr(0, pos); // <-- Canal de destino
-	params.erase(0, pos + 1)
+	params.erase(0, pos + 1);
 	
 	pos = params.find(' ');
 	if (pos == std::string::npos)
 		return ;
-	client_target = params.substr(0, pos) // <-- Objetivo del ban :D
-	params.erase(0, pos + 1)
+	client_target = params.substr(0, pos); // <-- Objetivo del ban :D
+	params.erase(0, pos + 2);
 
-	std::string	client_nick = _clients[client_i].getNick();
+	if (params.empty())
+	{
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+	}
+
+	std::cout << "client_nick: " << client_nick 
+			  << "\nparams: " << params
+			  << "\ndest_chan: " << dest_chan
+			  << "\nclient_target: " << client_target << std::endl;
 
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
@@ -28,14 +38,19 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 		{
 			if (_channels[i].isOperator(client_nick))
 			{
-				_channels[i].erraseMember(client_target);
+				if (!_channels[i].erraseMember(client_target))
+				{
+					msg = ":42.irc 441 " + client_target + " " + client_nick + dest_chan + "They aren't on that channel\r\n";
+					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+				}
 				return ;
 			}
-			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator";
+			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator\r\n";
 			send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+			return ;
 		}
 	}
-	std::cout << ITALIC MAGENTA "Usage: KICK <nick> [reason], kicks the nick from the current channel (needs chanop)";
+	send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 	std::cout << GREEN << "Executing _KICK" << NC << "\n";
 }
 

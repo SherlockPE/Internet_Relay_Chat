@@ -20,9 +20,9 @@ void	Server::select_command(std::string command, size_t client_i)
 
 	it = _coms.find(com);
 	if (it == _coms.end()) {
-		std::cout << RED << command << " ERR_UNKNOWNCOMMAND (421)" << NC << "\n";
-		msg = ":42.irc 421 " + _clients[client_i].getNick() + " " + com + " :Unknown command\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		std::cout << RED << com << " ERR_UNKNOWNCOMMAND (421)" << NC << "\n";
+		// msg = ":42.irc 421 " + _clients[client_i].getNick() + " " + com + " :Unknown command\r\n";
+		// send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
 

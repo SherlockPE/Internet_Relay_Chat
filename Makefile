@@ -15,6 +15,7 @@ SERVER_FILES =  Server \
 				connection_messages \
 				register_clients \
 				channel_operations \
+				tokenize \
 				messages
 
 UTILS_FILES = str_toupper

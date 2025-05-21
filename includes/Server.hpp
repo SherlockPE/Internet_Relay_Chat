@@ -55,6 +55,14 @@ template<class T> int	to_int(const T& value) {
 	return val;
 }
 
+typedef struct s_params
+{
+	std::string	dest_channel = NULL;
+	std::string	client_target = NULL;
+	std::string	other_params = NULL;
+} t_params;
+
+
 class Server;
 
 typedef void (Server::*com_fn) (std::string command, std::string params, size_t client_i);
@@ -80,14 +88,15 @@ class Server
 		std::map<std::string, com_fn>	_coms;
 
 		// METHODS AND MEMBER FUNCTIONS ----------------------------------------
-		void	init_server(void);
-		void	server_listen_loop(void);
-		void	server_accept(void);
-		void	server_read(size_t poll_i);
-		void	init_commands(void);
-		void	select_command(std::string command, size_t client_i);
-		void	parse_message(std::string msg, size_t client_i);
-		void	register_clients(void);
+		void		init_server(void);
+		void		server_listen_loop(void);
+		void		server_accept(void);
+		void		server_read(size_t poll_i);
+		void		init_commands(void);
+		void		select_command(std::string command, size_t client_i);
+		void		parse_message(std::string msg, size_t client_i);
+		void		register_clients(void);
+		t_params	tokenize(std::string params);
 
 		// Connection messages
 		void	_PASS(std::string, std::string, size_t);

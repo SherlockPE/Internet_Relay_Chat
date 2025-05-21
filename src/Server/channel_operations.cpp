@@ -6,31 +6,21 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 {
 	std::string msg; 
 	std::string dest_chan;
-	std::string client_target;
+	std::string	reason;
 	std::string	client_nick = _clients[client_i].getNick();
 
-	size_t pos = params.find(' ');
-	if (pos == std::string::npos)
-		return ;
-	dest_chan = params.substr(0, pos); // <-- Canal de destino
-	params.erase(0, pos + 1);
-	
-	pos = params.find(' ');
-	if (pos == std::string::npos)
-		return ;
-	client_target = params.substr(0, pos); // <-- Objetivo del ban :D
-	params.erase(0, pos + 2);
-
-	if (params.empty())
-	{
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
-	}
+	t_params tok = tokenize(params);
 
 	std::cout << "client_nick: " << client_nick 
 			  << "\nparams: " << params
 			  << "\ndest_chan: " << dest_chan
-			  << "\nclient_target: " << client_target << std::endl;
+			  << "\nclient_target: " << tok.client_target 
+			  << "\nreason: " << tok.other_params << std::endl;
+	if (tok.other_params.empty())
+	{
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+	}
 
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
@@ -38,11 +28,12 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 		{
 			if (_channels[i].isOperator(client_nick))
 			{
-				if (!_channels[i].erraseMember(client_target))
+				if (!_channels[i].erraseMember(tok.client_target))
 				{
-					msg = ":42.irc 441 " + client_target + " " + client_nick + dest_chan + "They aren't on that channel\r\n";
+					msg = ":42.irc 441 " + tok.client_target + " " + client_nick + dest_chan + "They aren't on that channel\r\n";
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 				}
+				// Quiero mandarle un mensaje al client_target de que ha sido kickeado por params razón
 				return ;
 			}
 			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator\r\n";

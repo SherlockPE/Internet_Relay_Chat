@@ -29,6 +29,8 @@ void	Server::server_accept(void)
 	new_pollfd.revents = 0;
 	
 	_pollfds.push_back(new_pollfd);
-	_clients.push_back(Client(new_pollfd, address));
+
+	_clients.insert(Client(new_pollfd, address));
+	
 	_clients_to_auth++;
 }

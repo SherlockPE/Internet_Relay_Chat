@@ -19,6 +19,8 @@
 
 #ifndef _CLIENT_HPP
 # define _CLIENT_HPP
+# define HOSTNAME "42.irc"
+
 
 #include <string>
 #include <vector>
@@ -28,6 +30,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string> 
 
 class Client
 {
@@ -56,7 +59,8 @@ class Client
 		void	setNick(const std::string &);
 		void	setUser(const std::string &);
 		void	setRealName(const std::string &);
-
+		
+		void	sendMessage(const std::string &, size_t);
 		bool	_register(const std::vector<std::string> &client_nicks);
 };
 

@@ -4,40 +4,39 @@
 // TODO: Eject a client from the channel
 void	Server::_KICK(std::string command, std::string params, size_t client_i)
 {
-	std::string msg; 
-	std::string dest_chan;
-	std::string	reason;
-	std::string	client_nick = _clients[client_i].getNick();
+	std::string msg, dest_chan, reason, client_target;
+	std::string	kicker = _clients[client_i].getNick();
+	std::istringstream iss(params);
 
-	t_params tok = tokenize(params);
-
-	std::cout << "client_nick: " << client_nick 
-			  << "\nparams: " << params
-			  << "\ndest_chan: " << dest_chan
-			  << "\nclient_target: " << tok.client_target 
-			  << "\nreason: " << tok.other_params << std::endl;
-	if (tok.other_params.empty())
+	// Recogida de datos
+	iss >> dest_chan >> client_target;
+	if (iss.fail())
 	{
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
+		_clients[client_i].sendMessage("Not enough parameters", 461);
+		return ;
 	}
+	std::getline(iss, reason);
+	if (reason.empty())
+		reason = "No reason specified";
 
+	// Buscando el canal de destino
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if ((_channels[i].getName() == dest_chan))
 		{
-			if (_channels[i].isOperator(client_nick))
+			// Compruebo si el kicker es operador del canal
+			if (_channels[i].isOperator(kicker))
 			{
-				if (!_channels[i].erraseMember(tok.client_target))
-				{
-					msg = ":42.irc 441 " + tok.client_target + " " + client_nick + dest_chan + "They aren't on that channel\r\n";
-					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
-				}
+				// Quitamos al miembro del canal
+				if (!_channels[i].erraseMember(client_target))
+					_clients[client_i].sendMessage("They aren't on that channel", 441);
+				_channels[i].
 				// Quiero mandarle un mensaje al client_target de que ha sido kickeado por params razón
 				return ;
 			}
-			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator\r\n";
-			send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+			_clients[client_i].sendMessage("You are not channel operator", 482);
+			std::cout << RED << command << " ERR_NOTCHANNELOP (482)" << NC << "\n";
 			return ;
 		}
 	}
@@ -112,8 +111,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 	if (params.empty())
 	{
 		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		_clients[client_i].sendMessage("Not enough parameters", 461);
 		return;
 	}
 	names_pos = params.find(' ');

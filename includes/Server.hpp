@@ -40,6 +40,7 @@
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
+#define HOSTNAME "42.irc"
 
 template<class T> std::string	to_string(const T& value) {
 	std::ostringstream oss;
@@ -57,9 +58,10 @@ template<class T> int	to_int(const T& value) {
 
 typedef struct s_params
 {
-	std::string	dest_channel = NULL;
-	std::string	client_target = NULL;
-	std::string	other_params = NULL;
+	std::string	dest_channel;
+	std::string	client;
+	std::string	client_target;
+	std::string	other_params;
 } t_params;
 
 
@@ -80,7 +82,7 @@ class Server
 		char		_buff[BUFF_SIZE];
 
 		std::vector<struct pollfd> _pollfds;
-		std::vector<Client> _clients;
+		std::map<std::string, Client> _clients;
 		std::vector<Client> _clqwertyients;
 		std::vector<std::string> _client_nicks;
 		std::vector<Channel> _channels;

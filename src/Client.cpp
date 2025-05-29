@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include <iostream>
+#include <sstream>
 
 // CONSTRUCTORS AND DESTRUCTORS ------------------------------------------------
 Client::Client(pollfd poll_data, sockaddr address)
@@ -69,6 +70,14 @@ void	Client::setUser(const std::string &new_user)
 void	Client::setRealName(const std::string &realname)
 {
 	_real_name = realname;
+}
+
+void	Client::sendMessage(const std::string &message, size_t code_num)
+{
+	std::ostringstream ss;
+	ss << "42.irc " << code_num << " " << _nick_name << " :" << message << "\r\n";
+	std::string msg = ss.str();
+	send(_poll_data.fd, msg.c_str(), msg.size(), 0);
 }
 
 bool	Client::_register(const std::vector<std::string> &client_nicks)

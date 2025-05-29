@@ -14,4 +14,5 @@ t_params	Server::tokenize(std::string params)
 		return result;
 	result.client = params.substr(0, pos); // <-- Client
 	params.erase(0, pos + 1);
+	return result;
 }

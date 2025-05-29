@@ -29,13 +29,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+class Client; // Forward declaration to avoid circular dependency
 class Channel
 {
 	private:
 		std::string	_channel_name;
 		std::string	_password;
 		std::string	_topic;
-		std::vector<std::string>	_members;
+		std::map<std::string, Client *>	_members;
 		std::vector<std::string>	_operators;
 		uint32_t	_invite_type;
 		uint32_t	_user_limit;

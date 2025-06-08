@@ -56,6 +56,7 @@ class Client
 		void	setNick(const std::string &);
 		void	setUser(const std::string &);
 		void	setRealName(const std::string &);
+		void	sendToClient(const std::string &, size_t);
 
 		bool	_register(const std::vector<std::string> &client_nicks);
 };

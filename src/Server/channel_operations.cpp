@@ -22,16 +22,7 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	params.erase(0, pos + 2);
 
 	if (params.empty())
-	{
-		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
-		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
-	}
-
-	std::cout << "client_nick: " << client_nick 
-			  << "\nparams: " << params
-			  << "\ndest_chan: " << dest_chan
-			  << "\nclient_target: " << client_target << std::endl;
-
+		_clients[client_i].sendToClient(":Not enough parameters", 461);
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if ((_channels[i].getName() == dest_chan))
@@ -40,17 +31,16 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 			{
 				if (!_channels[i].erraseMember(client_target))
 				{
-					msg = ":42.irc 441 " + client_target + " " + client_nick + dest_chan + "They aren't on that channel\r\n";
-					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+					msg = client_target +  " " + dest_chan + " :They aren't on that channel\r\n";
+					_clients[client_i].sendToClient(msg, 441);
 				}
 				return ;
 			}
-			msg = ":42.irc 482 " + client_nick + " " + dest_chan + " :You're not channel operator\r\n";
-			send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+			msg = dest_chan + " :You're not channel operator\r\n";
+			_clients[i].sendToClient(msg, 482);
 			return ;
 		}
 	}
-	send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 	std::cout << GREEN << "Executing _KICK" << NC << "\n";
 }
 

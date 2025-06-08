@@ -71,11 +71,10 @@ class Server
 		size_t		_clients_to_auth;
 		char		_buff[BUFF_SIZE];
 
-		std::vector<struct pollfd> _pollfds;
-		std::vector<Client> _clients;
-		std::vector<Client> _clqwertyients;
-		std::vector<std::string> _client_nicks;
-		std::vector<Channel> _channels;
+		std::vector<struct pollfd>	_pollfds;
+		std::vector<Client> 		_clients;
+		std::vector<std::string>	_client_nicks;
+		std::vector<Channel>		_channels;
 
 		std::map<std::string, com_fn>	_coms;
 

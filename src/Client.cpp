@@ -71,6 +71,14 @@ void	Client::setRealName(const std::string &realname)
 	_real_name = realname;
 }
 
+void	Client::sendToClient(const std::string &com, size_t code_num)
+{
+	std::string msg;
+
+	msg + ":42.irc " + std::to_string(code_num) + " " + _nick_name + " " + com + "\r\n";
+	send(this->_poll_data.fd, msg.c_str(), msg.size(), 0);
+}
+
 bool	Client::_register(const std::vector<std::string> &client_nicks)
 {
 	std::string	msg;

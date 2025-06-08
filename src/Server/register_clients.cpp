@@ -10,7 +10,7 @@ void	Server::register_clients(void)
 
 	while (i < _clients.size() && _clients_to_auth)
 	{
-		std::cout << WHITE "FD: [" << _pollfds[i + 1].fd << "]\n" << NC;
+		// std::cout << WHITE "FD: [" << _pollfds[i + 1].fd << "]\n" << NC;
 		if (_clients[i]._register(_client_nicks))
 		{
 			nick_name = _clients[i].getNick();

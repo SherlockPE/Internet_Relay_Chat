@@ -32,6 +32,16 @@ Server::Server(int port, std::string password): _port(port), _password(password)
 	server_listen_loop();
 }
 
+size_t	Server::search_client_by_name(std::string name)
+{
+	for (size_t	i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i].getNick() == name && _clients[i].getReg())
+			return (i);
+	}
+	return (_clients.size());
+}
+
 Server::~Server(void)
 {
 	std::cout << YELLOW << "Server closed" << NC << std::endl;

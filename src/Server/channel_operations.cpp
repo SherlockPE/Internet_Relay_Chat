@@ -7,7 +7,11 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	std::string msg; 
 	std::string dest_chan;
 	std::string client_target;
+	size_t		client_target_id;
 	std::string	client_nick = _clients[client_i].getNick();
+	std::cout << GREEN << "Executing " << command << NC << "\n";
+	if (params.empty())
+		_clients[client_i].sendToClient(":Not enough parameters", 461);
 
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
@@ -16,32 +20,33 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	params.erase(0, pos + 1);
 	
 	pos = params.find(' ');
-	if (pos == std::string::npos)
-		return ;
 	client_target = params.substr(0, pos); // <-- Objetivo del ban :D
-	params.erase(0, pos + 2);
-
-	if (params.empty())
-		_clients[client_i].sendToClient(":Not enough parameters", 461);
+	if (pos == std::string::npos)
+		params = ":you have been banned";
+	else
+		params.erase(0, pos + 1);
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if ((_channels[i].getName() == dest_chan))
 		{
 			if (_channels[i].isOperator(client_nick))
 			{
-				if (!_channels[i].erraseMember(client_target))
-				{
-					msg = client_target +  " " + dest_chan + " :They aren't on that channel\r\n";
-					_clients[client_i].sendToClient(msg, 441);
+				if (_channels[i].erraseMember(client_target))
+				{ // Notificacion al baneado de que ha sido baneado ;D
+					client_target_id = search_client_by_name(client_target);
+					msg = ":42.irc " + command + " " + dest_chan + " " + client_target + " " + params + "\r\n";
+					std::cout << "Mensaje a enviar: " << msg << std::endl;
+					send(_pollfds[client_target_id + 1].fd, msg.c_str(), msg.size(), 0);
 				}
+				msg = dest_chan + " :They aren't on that channel";
+				_clients[client_i].sendToClient(msg, 441);
 				return ;
 			}
-			msg = dest_chan + " :You're not channel operator\r\n";
-			_clients[i].sendToClient(msg, 482);
+			msg = dest_chan + " :You're not channel operator";
+			_clients[client_i].sendToClient(msg, 482);
 			return ;
 		}
 	}
-	std::cout << GREEN << "Executing _KICK" << NC << "\n";
 }
 
 // TODO: https://modern.ircdocs.horse/#invite-message

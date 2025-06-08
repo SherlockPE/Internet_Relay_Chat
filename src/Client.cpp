@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Server.hpp"
 #include <iostream>
 
 // CONSTRUCTORS AND DESTRUCTORS ------------------------------------------------
@@ -75,7 +76,7 @@ void	Client::sendToClient(const std::string &com, size_t code_num)
 {
 	std::string msg;
 
-	msg + ":42.irc " + std::to_string(code_num) + " " + _nick_name + " " + com + "\r\n";
+	msg = ":42.irc " + to_string(code_num) + " " + _nick_name + " " + com + "\r\n";
 	send(this->_poll_data.fd, msg.c_str(), msg.size(), 0);
 }
 
@@ -83,11 +84,13 @@ bool	Client::_register(const std::vector<std::string> &client_nicks)
 {
 	std::string	msg;
 
+	if (this->getReg())
+		return (false);
 	if (_user_name.empty() || _nick_name.empty() || _password.empty())
 		return false;
 	if (std::find(client_nicks.begin(), client_nicks.end(), _nick_name) != client_nicks.end())
 	{
-		std::cout << RED << "ERR_NICKNAMEINUSE (433)" << NC << "\n";
+		std::cout << RED << "sending to:" << _nick_name << " ERR_NICKNAMEINUSE (433)" << NC << "\n";
 		msg = ":42.irc 433" + _nick_name + " " + _nick_name + " :Nickname is already in use\r\n";
 		send(_poll_data.fd, msg.c_str(), msg.size(), 0);
 		return false;

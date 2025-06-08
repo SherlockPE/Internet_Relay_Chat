@@ -40,6 +40,7 @@
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
+#define TIMEOUT 6000
 
 template<class T> std::string	to_string(const T& value) {
 	std::ostringstream oss;
@@ -87,6 +88,8 @@ class Server
 		void	select_command(std::string command, size_t client_i);
 		void	parse_message(std::string msg, size_t client_i);
 		void	register_clients(void);
+		size_t	search_client_by_name(std::string name);
+
 
 		// Connection messages
 		void	_PASS(std::string, std::string, size_t);

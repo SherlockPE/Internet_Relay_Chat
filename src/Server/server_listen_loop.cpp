@@ -6,7 +6,12 @@ void	Server::server_listen_loop(void)
 	
 	while (true)
 	{
-		number_of_polls = poll(&_pollfds[0], _pollfds.size(), -1);
+		std::cout << WHITE "=============Clients============\n" NC;
+		for (size_t i = 0; i < _client_nicks.size(); i++)
+			std::cout << "Name [" << i << "] " << _client_nicks[i] << "\n";
+		std::cout << WHITE "================================\n" NC;
+
+		number_of_polls = poll(&_pollfds[0], _pollfds.size(), TIMEOUT);  
 		if (number_of_polls == -1)
 			std::cerr << RED << "Error trying to poll the socket" << NC << std::endl;
 		else if (number_of_polls > 0)
@@ -24,15 +29,15 @@ void	Server::server_listen_loop(void)
 
 				}
 			}
-			if (_clients_to_auth)
-				register_clients();
-			for (size_t i = 0; i < _channels.size();) {
-				if (_channels[i].isEmpty()) {
-					_channels.erase(_channels.begin() + i);
-					continue;
-				}
-				i++;
+		}
+		if (_clients_to_auth)
+			register_clients();
+		for (size_t i = 0; i < _channels.size();) {
+			if (_channels[i].isEmpty()) {
+				_channels.erase(_channels.begin() + i);
+				continue;
 			}
+			i++;
 		}
 	}
 }

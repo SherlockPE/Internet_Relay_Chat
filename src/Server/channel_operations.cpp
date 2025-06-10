@@ -18,7 +18,7 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 		return ;
 	dest_chan = params.substr(0, pos); // <-- Canal de destino
 	params.erase(0, pos + 1);
-	
+
 	pos = params.find(' ');
 	client_target = params.substr(0, pos); // <-- Objetivo del ban :D
 	if (pos == std::string::npos)
@@ -32,22 +32,43 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 			if (_channels[i].isOperator(client_nick))
 			{
 				if (_channels[i].erraseMember(client_target))
-				{ // Notificacion al baneado de que ha sido baneado ;D
+				{
+					// Notificacion al baneado de que ha sido baneado ;D
 					client_target_id = search_client_by_name(client_target);
 					msg = ":42.irc " + command + " " + dest_chan + " " + client_target + " " + params + "\r\n";
-					std::cout << "Mensaje a enviar: " << msg << std::endl;
 					send(_pollfds[client_target_id + 1].fd, msg.c_str(), msg.size(), 0);
+					msg = dest_chan + "User: [" + client_target + "] " + "has been banned for: " + params ;
+					_clients[client_i].sendToClient(msg, 0);
 				}
-				msg = dest_chan + " :They aren't on that channel";
-				_clients[client_i].sendToClient(msg, 441);
+				else
+				{
+					msg = dest_chan + " :They aren't on that channel";
+					_clients[client_i].sendToClient(msg, 441);
+				}
 				return ;
 			}
 			msg = dest_chan + " :You're not channel operator";
 			_clients[client_i].sendToClient(msg, 482);
 			return ;
-		}
+		} 
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // TODO: https://modern.ircdocs.horse/#invite-message
 // TODO: Invite a client to a channel

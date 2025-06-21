@@ -37,9 +37,9 @@ class Channel
 		std::string	_topic;
 		std::vector<std::string>	_members;
 		std::vector<std::string>	_operators;
-		uint32_t	_invite_type;
 		uint32_t	_user_limit;
-		uint32_t	_channel_type;
+		bool	_invite_mode;
+		bool	_topic_mode;
 
 	public:
 		Channel(const std::string &channel_name, const std::string &channel_pass);

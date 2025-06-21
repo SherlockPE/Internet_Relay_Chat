@@ -60,21 +60,57 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	}
 }
 
+// TODO: https://modern.ircdocs.horse/#topic-message
+// TODO: Change or view the channel topic
+void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
+{
+	std::string msg; 
+	std::string dest_chan;
+	std::string new_topic;
+	std::string	client_nick = _clients[client_i].getNick();
+	bool	show_topic = false;
+	bool	is_oper = false;
 
+	std::cout << GREEN << "Executing " << command << NC << "\n";
+	if (params.empty())
+		_clients[client_i].sendToClient(":Not enough parameters", 461);
 
+	size_t pos = params.find(' ');
+	if (pos == std::string::npos)
+		return ;
+	dest_chan = params.substr(0, pos); // <-- Canal de destino
+	params.erase(0, pos + 1);
 
+	pos = params.find(' ');
+	new_topic = params.substr(0, pos); // <-- Nuevo topic
+	if (pos == std::string::npos)
+		show_topic = true;
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if ((_channels[i].getName() == dest_chan))
+		{
+			if (show_topic)
+			{
+				// RPL_TOPIC (332) 
+				msg = dest_chan + " :" + _channels[i].getTopic();
+				_clients[client_i].sendToClient(msg, 332);
+				return ;
+			}
+			if (_channels[i].isOperator(client_nick))
+				is_oper = true;
+			if (new_topic == _channels[i].getTopic())
+				return ;
 
-
-
-
-
-
-
-
-
-
-
-
+			
+			msg = dest_chan + " :You're not channel operator";
+			_clients[client_i].sendToClient(msg, 482);
+			return ;
+		} 
+	}
+	msg = dest_chan + " :No such channel\r\n";
+	_clients[client_i].sendToClient(msg, 403);
+	std::cout << GREEN << "Executing _TOPIC" << NC << "\n";
+}
 
 // TODO: https://modern.ircdocs.horse/#invite-message
 // TODO: Invite a client to a channel
@@ -83,18 +119,10 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 	(void)command;
 	(void)params;
 	(void)client_i;
+
+
 	std::cout << ITALIC MAGENTA "Usage: INVITE <nick> [<channel>], invites someone to a channel, by default the current channel (needs chanop)";
 	std::cout << GREEN << "Executing _INVITE" << NC << "\n";
-}
-
-// TODO: https://modern.ircdocs.horse/#topic-message
-// TODO: Change or view the channel topic
-void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
-{
-	(void)command;
-	(void)params;
-	(void)client_i;
-	std::cout << GREEN << "Executing _TOPIC" << NC << "\n";
 }
 
 // TODO: https://modern.ircdocs.horse/#mode-message

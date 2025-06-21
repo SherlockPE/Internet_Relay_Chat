@@ -70,10 +70,10 @@ bool	Channel::erraseMember(std::string client_nick)
 		return result;
 	_members.erase(it);
 	result = true;
-	// it = std::find(_operators.begin(), _operators.end(), client_nick);
-	// if (it == _operators.end())
-	// 	return result;
-	// _operators.erase(it);
+	it = std::find(_operators.begin(), _operators.end(), client_nick);
+	if (it == _operators.end())
+		return result;
+	_operators.erase(it);
 	return result;
 }
 

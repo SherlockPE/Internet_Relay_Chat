@@ -25,6 +25,12 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 		params = ":you have been banned";
 	else
 		params.erase(0, pos + 1);
+	if (client_target == client_nick)
+	{
+		msg = command + " " + dest_chan + " " + client_target + " :You can't kick yourself, don't be a dummy\r\n";
+		_clients[client_i].sendToClient(msg, 0);
+		return ;
+	}
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if ((_channels[i].getName() == dest_chan))

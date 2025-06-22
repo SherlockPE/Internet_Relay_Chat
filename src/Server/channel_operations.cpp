@@ -9,6 +9,7 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	std::string client_target;
 	size_t		client_target_id;
 	std::string	client_nick = _clients[client_i].getNick();
+
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
@@ -64,12 +65,14 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 // TODO: Change or view the channel topic
 void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 {
-	std::string msg; 
+	std::string msg;
 	std::string dest_chan;
 	std::string new_topic;
+	std::string old_topic;
 	std::string	client_nick = _clients[client_i].getNick();
 	bool	show_topic = false;
-	bool	is_oper = false;
+	bool	is_oper;
+	bool	oper_needed;
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
@@ -78,51 +81,117 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
 		return ;
-	dest_chan = params.substr(0, pos); // <-- Canal de destino
+	dest_chan = params.substr(0, pos);
 	params.erase(0, pos + 1);
 
 	pos = params.find(' ');
-	new_topic = params.substr(0, pos); // <-- Nuevo topic
+	new_topic = params.substr(0, pos);
 	if (pos == std::string::npos)
 		show_topic = true;
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if ((_channels[i].getName() == dest_chan))
 		{
+			old_topic = _channels[i].getTopic();
 			if (show_topic)
 			{
-				// RPL_TOPIC (332) 
-				msg = dest_chan + " :" + _channels[i].getTopic();
-				_clients[client_i].sendToClient(msg, 332);
+				if (old_topic.empty())
+				{
+					// RPL_NOTOPIC (331)
+					msg = dest_chan + " :No topic is set";
+					_clients[client_i].sendToClient(msg, 331);
+				}
+				else
+				{
+					// RPL_TOPIC (332)
+					msg = dest_chan + " :" + old_topic;
+					_clients[client_i].sendToClient(msg, 332);
+				}
 				return ;
 			}
-			if (_channels[i].isOperator(client_nick))
-				is_oper = true;
-			if (new_topic == _channels[i].getTopic())
+			if (new_topic == old_topic)
 				return ;
-
-			
-			msg = dest_chan + " :You're not channel operator";
-			_clients[client_i].sendToClient(msg, 482);
+			is_oper = _channels[i].isOperator(client_nick);
+			oper_needed = _channels[i].getTopicMode();
+			if (oper_needed && !is_oper)
+			{
+				msg = dest_chan + " :You're not channel operator";
+				_clients[client_i].sendToClient(msg, 482);
+				return ;
+			}
+			_channels[i].setTopic(new_topic);
+			msg = ":42.irc TOPIC " + dest_chan + " :" + new_topic;
+			for (size_t n = 0; n < _clients.size(); n++) {
+				if (_channels[i].isMember(_clients[n].getNick()))
+					send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
+			}
 			return ;
 		} 
 	}
-	msg = dest_chan + " :No such channel\r\n";
+	msg = dest_chan + " :No such channel";
 	_clients[client_i].sendToClient(msg, 403);
-	std::cout << GREEN << "Executing _TOPIC" << NC << "\n";
 }
 
 // TODO: https://modern.ircdocs.horse/#invite-message
 // TODO: Invite a client to a channel
 void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 {
-	(void)command;
-	(void)params;
-	(void)client_i;
+	std::string msg;
+	std::string dest_chan;
+	std::string dest_client;
+	std::string	client_nick = _clients[client_i].getNick();
+	bool	is_oper;
+	bool	oper_needed;
 
+	std::cout << GREEN << "Executing " << command << NC << "\n";
+	if (params.empty())
+		_clients[client_i].sendToClient(":Not enough parameters", 461);
 
-	std::cout << ITALIC MAGENTA "Usage: INVITE <nick> [<channel>], invites someone to a channel, by default the current channel (needs chanop)";
-	std::cout << GREEN << "Executing _INVITE" << NC << "\n";
+	size_t pos = params.find(' ');
+	dest_client = params.substr(0, pos);
+	if (pos == std::string::npos)
+		return ;
+	params.erase(0, pos + 1);
+	
+	pos = params.find(' ');
+	dest_chan = params.substr(0, pos);
+	if (pos == std::string::npos)
+		return ;
+
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i].getName() == dest_chan)
+		{
+			if (!_channels[i].isMember(client_nick))
+			{
+				msg = dest_chan + " :You're not on that channel";
+				_clients[client_i].sendToClient(msg, 442);
+				return ;
+			}
+			is_oper = _channels[i].isOperator(client_nick);
+			oper_needed = _channels[i].getInviteMode();
+			if (oper_needed && !is_oper)
+			{
+				msg = dest_chan + " :You're not channel operator";
+				_clients[client_i].sendToClient(msg, 482);
+				return ;
+			}
+			if (_channels[i].isMember(dest_client))
+			{
+				msg = dest_client + " " + dest_chan + " :Is already on channel";
+				_clients[client_i].sendToClient(msg, 443);
+				return ;
+			}
+			msg = ":" + client_nick + " INVITE " + dest_client + dest_chan;
+			size_t n = search_client_by_name(dest_client);
+			if (n < _clients.size())
+				send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
+			msg = dest_client + dest_chan;
+			_clients[client_i].sendToClient(msg, 341);
+		}
+		msg = dest_chan + " :No such channel";
+		_clients[client_i].sendToClient(msg, 403);
+	}
 }
 
 // TODO: https://modern.ircdocs.horse/#mode-message
@@ -134,9 +203,60 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 	// l: Set/remove the user limit to channel
 void	Server::_MODE(std::string command, std::string params, size_t client_i)
 {
-	(void)command;
-	(void)params;
-	(void)client_i;
+	std::string msg;
+	std::string dest_chan;
+	std::string mode_string;
+	std::string	client_nick = _clients[client_i].getNick();
+	bool	is_oper;
+	bool	oper_needed;
+
+	std::cout << GREEN << "Executing " << command << NC << "\n";
+	if (params.empty())
+		_clients[client_i].sendToClient(":Not enough parameters", 461);
+
+	size_t pos = params.find(' ');
+	dest_chan = params.substr(0, pos);
+	if (pos == std::string::npos)
+		return ;
+	params.erase(0, pos + 1);
+	
+	pos = params.find(' ');
+	if (pos < std::string::npos)
+	{
+		mode_string = params.substr(0, pos);
+		params.erase(0, pos + 1);
+	}
+
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i].getName() == dest_chan)
+		{
+			if (!_channels[i].isMember(client_nick))
+			{
+				msg = dest_chan + " :You're not on that channel";
+				_clients[client_i].sendToClient(msg, 442);
+				return ;
+			}
+			if (mode_string.empty())
+			{
+				// RPL_CHANNELMODIS (324)
+				mode_string = _channels[i].getModeString();
+				params = _channels[i].getModeArg();
+				msg = ":42.irc 324 " + client_nick + " " + dest_chan + " " + mode_string + " " + params + "\r\n";
+			}
+			is_oper = _channels[i].isOperator(client_nick);
+			oper_needed = _channels[i].getInviteMode();
+			if (oper_needed && !is_oper)
+			{
+				msg = dest_chan + " :You're not channel operator";
+				_clients[client_i].sendToClient(msg, 482);
+				return ;
+			}
+
+		}
+		msg = dest_chan + " :No such channel";
+		_clients[client_i].sendToClient(msg, 403);
+	}
 	std::cout << GREEN << "Executing _MODE" << NC << "\n";
 }
 

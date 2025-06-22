@@ -52,11 +52,21 @@ class Channel
 		std::string getName(void);
 		std::string getPass(void);
 		std::string getTopic(void);
-
+		uint32_t getUsrerLimit(void);
+		bool getInviteMode(void);
+		bool getTopicMode(void);
+		
+		void setPass(std::string);
+		void setTopic(std::string);
+		void setUsrerLimit(uint32_t);
+		void setInviteMode(bool);
+		void setTopicMode(bool);
+		
 		void addMember(std::string client_nick);
 		void addOperator(std::string client_nick);
 		
 		bool erraseMember(std::string client_nick);
+		bool erraseOperator(std::string client_nick);
 
 		bool isMember(std::string client_nick);
 		bool isOperator(std::string client_nick);

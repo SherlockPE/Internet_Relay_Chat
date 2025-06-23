@@ -16,7 +16,7 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
-		return ;
+		return;
 	dest_chan = params.substr(0, pos); // <-- Canal de destino
 	params.erase(0, pos + 1);
 
@@ -30,7 +30,7 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 	{
 		msg = command + " " + dest_chan + " " + client_target + " :You can't kick yourself, don't be a dummy\r\n";
 		_clients[client_i].sendToClient(msg, 0);
-		return ;
+		return;
 	}
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
@@ -52,11 +52,11 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 					msg = dest_chan + " :They aren't on that channel";
 					_clients[client_i].sendToClient(msg, 441);
 				}
-				return ;
+				return;
 			}
 			msg = dest_chan + " :You're not channel operator";
 			_clients[client_i].sendToClient(msg, 482);
-			return ;
+			return;
 		} 
 	}
 }
@@ -80,7 +80,7 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
-		return ;
+		return;
 	dest_chan = params.substr(0, pos);
 	params.erase(0, pos + 1);
 
@@ -107,17 +107,17 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 					msg = dest_chan + " :" + old_topic;
 					_clients[client_i].sendToClient(msg, 332);
 				}
-				return ;
+				return;
 			}
 			if (new_topic == old_topic)
-				return ;
+				return;
 			is_oper = _channels[i].isOperator(client_nick);
 			oper_needed = _channels[i].getTopicMode();
 			if (oper_needed && !is_oper)
 			{
 				msg = dest_chan + " :You're not channel operator";
 				_clients[client_i].sendToClient(msg, 482);
-				return ;
+				return;
 			}
 			_channels[i].setTopic(new_topic);
 			msg = ":42.irc TOPIC " + dest_chan + " :" + new_topic;
@@ -125,7 +125,7 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 				if (_channels[i].isMember(_clients[n].getNick()))
 					send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
 			}
-			return ;
+			return;
 		} 
 	}
 	msg = dest_chan + " :No such channel";
@@ -150,13 +150,13 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 	size_t pos = params.find(' ');
 	dest_client = params.substr(0, pos);
 	if (pos == std::string::npos)
-		return ;
+		return;
 	params.erase(0, pos + 1);
 	
 	pos = params.find(' ');
 	dest_chan = params.substr(0, pos);
 	if (pos == std::string::npos)
-		return ;
+		return;
 
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
@@ -166,7 +166,7 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 			{
 				msg = dest_chan + " :You're not on that channel";
 				_clients[client_i].sendToClient(msg, 442);
-				return ;
+				return;
 			}
 			is_oper = _channels[i].isOperator(client_nick);
 			oper_needed = _channels[i].getInviteMode();
@@ -174,13 +174,13 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 			{
 				msg = dest_chan + " :You're not channel operator";
 				_clients[client_i].sendToClient(msg, 482);
-				return ;
+				return;
 			}
 			if (_channels[i].isMember(dest_client))
 			{
 				msg = dest_client + " " + dest_chan + " :Is already on channel";
 				_clients[client_i].sendToClient(msg, 443);
-				return ;
+				return;
 			}
 			msg = ":" + client_nick + " INVITE " + dest_client + dest_chan;
 			size_t n = search_client_by_name(dest_client);
@@ -217,7 +217,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 	size_t pos = params.find(' ');
 	dest_chan = params.substr(0, pos);
 	if (pos == std::string::npos)
-		return ;
+		return;
 	params.erase(0, pos + 1);
 	
 	pos = params.find(' ');
@@ -235,7 +235,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 			{
 				msg = dest_chan + " :You're not on that channel";
 				_clients[client_i].sendToClient(msg, 442);
-				return ;
+				return;
 			}
 			if (mode_string.empty())
 			{
@@ -243,6 +243,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 				mode_string = _channels[i].getModeString();
 				params = _channels[i].getModeArg();
 				msg = ":42.irc 324 " + client_nick + " " + dest_chan + " " + mode_string + " " + params + "\r\n";
+				return;
 			}
 			is_oper = _channels[i].isOperator(client_nick);
 			oper_needed = _channels[i].getInviteMode();
@@ -250,7 +251,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 			{
 				msg = dest_chan + " :You're not channel operator";
 				_clients[client_i].sendToClient(msg, 482);
-				return ;
+				return;
 			}
 
 		}

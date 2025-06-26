@@ -38,6 +38,7 @@ class Client
 		std::string	_nick_name;
 		std::string	_user_name;
 		std::string	_real_name;
+		std::vector<std::string>	_invites;
 		bool	_registered;
 
 
@@ -51,6 +52,10 @@ class Client
 
 		std::string getNick(void) const;
 		bool getReg(void) const;
+
+		bool isInvited(std::string channel_name);
+		void addInvite(std::string channel_name);
+		void removeInvite(std::string channel_name);
 
 		void	setPass(const std::string &);
 		void	setNick(const std::string &);

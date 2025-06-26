@@ -55,6 +55,29 @@ bool Client::getReg(void) const
 	return _registered;
 }
 
+bool Client::isInvited(std::string channel_name)
+{
+	if (std::find(_invites.begin(), _invites.end(), channel_name) != _invites.end())
+		return true;
+	return false;
+}
+void Client::addInvite(std::string channel_name)
+{
+	if (isInvited(channel_name))
+		return;
+	_invites.push_back(channel_name);
+	return;
+}
+void Client::removeInvite(std::string channel_name)
+{
+	std::vector<std::string>::iterator	it;
+
+	it = std::find(_invites.begin(), _invites.end(), channel_name);
+	if (it != _invites.end())
+		_invites.erase(it);
+	return;
+}
+
 void	Client::setPass(const std::string &new_pass)
 {
 	_password = new_pass;

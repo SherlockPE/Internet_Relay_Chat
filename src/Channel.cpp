@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "Server.hpp"
 #include <iostream>
 
 // CONSTRUCTORS AND DESTRUCTORS-------------------------------------------------
@@ -50,7 +51,11 @@ std::string	Channel::getTopic(void)
 {
 	return _topic;
 }
-uint32_t Channel::getUsrerLimit(void)
+size_t Channel::getMemberNum(void)
+{
+	return _members.size();
+}
+size_t Channel::getUserLimit(void)
 {
 	return _user_limit;
 }
@@ -62,6 +67,27 @@ bool Channel::getTopicMode(void)
 {
 	return _topic_mode;
 }
+// i: Set/remove Invite-only channel
+// t: Set/remove the restrictions of the TOPIC command to channel operators
+// k: Set/remove the channel key (password)
+// o: Give/take channel operator privilege
+// l: Set/remove the user limit to channel
+std::string	Channel::getModeString(void)
+{
+	std::string	result;
+
+	if (_invite_mode)
+		result += "i";
+	if (_topic_mode)
+		result += "t";
+	if (!_password.empty())
+		result += "k";
+	if (_user_limit)
+		result += "l " + to_string(_user_limit);
+	if (!result.empty())
+		result.insert(0,"+");
+	return result;
+}
 
 void	Channel::setPass(std::string new_password)
 {
@@ -71,7 +97,7 @@ void	Channel::setTopic(std::string new_topic)
 {
 	_topic = new_topic;
 }
-void Channel::setUsrerLimit(uint32_t new_user_limit)
+void Channel::setUserLimit(size_t new_user_limit)
 {
 	_user_limit = new_user_limit;
 }

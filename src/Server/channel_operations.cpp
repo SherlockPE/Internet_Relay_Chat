@@ -185,12 +185,138 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 			msg = ":" + client_nick + " INVITE " + dest_client + dest_chan;
 			size_t n = search_client_by_name(dest_client);
 			if (n < _clients.size())
+			{
+				_clients[n].addInvite(dest_chan);
 				send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
+			}
 			msg = dest_client + dest_chan;
 			_clients[client_i].sendToClient(msg, 341);
 		}
 		msg = dest_chan + " :No such channel";
 		_clients[client_i].sendToClient(msg, 403);
+	}
+}
+
+static bool	check_mode_str(std::string mode_string)
+{
+	if (mode_string[0] != '-' && mode_string[0] != '+')
+		return true;
+	if (mode_string.back() == '+' || mode_string.back() == '-')
+		return true;
+	if (mode_string.find_first_not_of("itkol+-") != std::string::npos)
+		return true;
+	if (mode_string.find_first_not_of("+-") == std::string::npos)
+		return true;
+	if (mode_string.size() <= 1)
+		return true;
+	if (mode_string[1] == '+' || mode_string[1] == '-')
+		return true;
+	if (std::count(mode_string.begin(), mode_string.end(), '+') > 1)
+		return true;
+	if (std::count(mode_string.begin(), mode_string.end(), '-') > 1)
+		return true;
+
+	return false;
+}
+static void	remove_modes(std::string &modes_to_remove, Channel &chan, Client &client, std::string &dest_chan, std::string &params)
+{
+	std::string msg;
+	std::string mode_param;
+	size_t	pos;
+
+	for (size_t n = 1; n < modes_to_remove.size(); n++) {
+		if (modes_to_remove[n] == 'i') {
+			chan.setInviteMode(false);
+		}
+		else if (modes_to_remove[n] == 't') {
+			chan.setTopicMode(false);
+		}
+		else if (modes_to_remove[n] == 'k') {
+			chan.setPass("");
+		}
+		else if (modes_to_remove[n] == 'o') {
+			pos = params.find(' ');
+			mode_param = params.substr(0, pos);
+			if (pos == std::string::npos)
+				params.erase(0, pos);
+			else
+				params.erase(0, pos + 1);
+
+			if (chan.isOperator(mode_param))
+				chan.erraseOperator(mode_param);
+			else {
+				msg = dest_chan + " -o " + mode_param + " :User is not an operator";
+				client.sendToClient(msg, 696);
+			}
+		}
+		else if (modes_to_remove[n] == 'l') {
+			chan.setUserLimit(0);
+		}
+	}
+}
+static bool is_not_print(unsigned char c) {
+    return !std::isprint(c);
+}
+static void	add_modes(std::string &modes_to_add, Channel &chan, Client &client, std::string &dest_chan, std::string &params)
+{
+	std::string msg;
+	std::string mode_param;
+	size_t	pos;
+	size_t	user_limit;
+
+	for (size_t n = 1; n < modes_to_add.size(); n++) {
+		if (modes_to_add[n] == 'i') {
+			chan.setInviteMode(true);
+		}
+		else if (modes_to_add[n] == 't') {
+			chan.setTopicMode(true);
+		}
+		else if (modes_to_add[n] == 'k') {
+			pos = params.find(' ');
+			mode_param = params.substr(0, pos);
+			if (pos == std::string::npos)
+				params.erase(0, pos);
+			else
+				params.erase(0, pos + 1);
+
+			if (std::count_if(mode_param.begin(), mode_param.end(), is_not_print) == 0)
+				chan.setPass(mode_param);
+			else {
+				msg = dest_chan + " +k " + mode_param + " :Invalid channel key";
+				client.sendToClient(msg, 696);
+			}
+		}
+		else if (modes_to_add[n] == 'o') {
+			pos = params.find(' ');
+			mode_param = params.substr(0, pos);
+			if (pos == std::string::npos)
+				params.erase(0, pos);
+			else
+				params.erase(0, pos + 1);
+
+			if (chan.isOperator(mode_param))
+				chan.erraseOperator(mode_param);
+			else {
+				msg = dest_chan + " +o " + mode_param + " :User is not an operator";
+				client.sendToClient(msg, 696);
+			}
+		}
+		else if (modes_to_add[n] == 'l') {
+			pos = params.find(' ');
+			mode_param = params.substr(0, pos);
+			if (pos == std::string::npos)
+				params.erase(0, pos);
+			else
+				params.erase(0, pos + 1);
+
+			user_limit = to_int(mode_param);
+			if (user_limit > 0)
+				chan.setUserLimit(user_limit);
+			else {
+				msg = dest_chan + " +l " + mode_param + " :Invalid user limit";
+				client.sendToClient(msg, 696);
+			}
+		}
 	}
 }
 
@@ -206,9 +332,9 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 	std::string msg;
 	std::string dest_chan;
 	std::string mode_string;
+	std::string modes_to_add;
+	std::string modes_to_remove;
 	std::string	client_nick = _clients[client_i].getNick();
-	bool	is_oper;
-	bool	oper_needed;
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
@@ -241,24 +367,47 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 			{
 				// RPL_CHANNELMODIS (324)
 				mode_string = _channels[i].getModeString();
-				params = _channels[i].getModeArg();
-				msg = ":42.irc 324 " + client_nick + " " + dest_chan + " " + mode_string + " " + params + "\r\n";
+				msg = dest_chan + " " + mode_string;
+				_clients[client_i].sendToClient(msg, 324);
 				return;
 			}
-			is_oper = _channels[i].isOperator(client_nick);
-			oper_needed = _channels[i].getInviteMode();
-			if (oper_needed && !is_oper)
+			if (_channels[i].isOperator(client_nick))
 			{
 				msg = dest_chan + " :You're not channel operator";
 				_clients[client_i].sendToClient(msg, 482);
 				return;
 			}
-
+			// ERR_INVALIDMODEPARAM (696)
+			// "<client> <target chan/user> <mode char> <parameter> :<description>"
+			if (check_mode_str(mode_string))
+			{
+				msg = dest_chan + " " + mode_string + " :Invalid mode parameters";
+				_clients[client_i].sendToClient(msg, 696);
+				return;
+			}
+			if (mode_string[0] != '-')
+			{
+				pos = mode_string.find('+');
+				modes_to_remove = mode_string.substr(0, pos);
+				if (pos < std::string::npos)
+					modes_to_add = mode_string.substr(pos + 1);
+				remove_modes(modes_to_remove, _channels[i], _clients[client_i], dest_chan, params);
+				add_modes(modes_to_add, _channels[i], _clients[client_i], dest_chan, params);				
+			}
+			else
+			{
+				pos = mode_string.find('-');
+				modes_to_add = mode_string.substr(0, pos);
+				if (pos < std::string::npos)
+					modes_to_remove = mode_string.substr(pos + 1);
+				add_modes(modes_to_add, _channels[i], _clients[client_i], dest_chan, params);
+				remove_modes(modes_to_remove, _channels[i], _clients[client_i], dest_chan, params);
+			}
+			return;
 		}
 		msg = dest_chan + " :No such channel";
 		_clients[client_i].sendToClient(msg, 403);
 	}
-	std::cout << GREEN << "Executing _MODE" << NC << "\n";
 }
 
 // TODO: inprove parsing (optional)
@@ -346,16 +495,29 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 			if (it->first == _channels[i].getName()) {
 				if (_channels[i].isMember(client_nick))
 					std::cout << RED << "Channel " << it->first << " already joined" << NC << "\n";
-				else if (_channels[i].getPass().empty() || _channels[i].getPass() == it->second)
+				else if (_channels[i].getMemberNum() >= _channels[i].getUserLimit())
 				{
-					_channels[i].addMember(client_nick);
-					msg = ":" + client_nick + " JOIN " + it->first + "\r\n";
+					std::cout << RED << command << " ERR_CHANNELISFULL (471)" << NC << "\n";
+					msg = ":42.irc 471 " + name + " " + it->first + " :Cannot join channel, user limit reached\r\n";
+					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+				}
+				else if (!_channels[i].getPass().empty() && _channels[i].getPass() != it->second)
+				{
+					std::cout << RED << command << " ERR_BADCHANNELKEY (475)" << NC << "\n";
+					msg = ":42.irc 475 " + name + " " + it->first + " :Cannot join channel, bad password\r\n";
+					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+				}
+				else if (_channels[i].getInviteMode() && !_clients[client_i].isInvited(it->first))
+				{
+					std::cout << RED << command << " ERR_INVITEONLYCHAN (473)" << NC << "\n";
+					msg = ":42.irc 473 " + name + " " + it->first + " :Cannot join channel, invite needed\r\n";
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 				}
 				else
 				{
-					std::cout << RED << command << " ERR_BADCHANNELKEY (475)" << NC << "\n";
-					msg = ":42.irc 475 " + name + " " + it->first + " :Cannot join channel (+k)\r\n";
+					_channels[i].addMember(client_nick);
+					_clients[client_i].removeInvite(it->first);
+					msg = ":" + client_nick + " JOIN " + it->first + "\r\n";
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 				}
 				channel_found = 1;

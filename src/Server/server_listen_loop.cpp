@@ -34,6 +34,8 @@ void	Server::server_listen_loop(void)
 			register_clients();
 		for (size_t i = 0; i < _channels.size();) {
 			if (_channels[i].isEmpty()) {
+				for (size_t n = 0; n < _clients.size(); n++)
+					_clients[n].removeInvite(_channels[i].getName());
 				_channels.erase(_channels.begin() + i);
 				continue;
 			}

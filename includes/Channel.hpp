@@ -37,7 +37,7 @@ class Channel
 		std::string	_topic;
 		std::vector<std::string>	_members;
 		std::vector<std::string>	_operators;
-		uint32_t	_user_limit;
+		size_t	_user_limit;
 		bool	_invite_mode;
 		bool	_topic_mode;
 
@@ -52,13 +52,15 @@ class Channel
 		std::string getName(void);
 		std::string getPass(void);
 		std::string getTopic(void);
-		uint32_t getUsrerLimit(void);
+		size_t getMemberNum(void);
+		size_t getUserLimit(void);
 		bool getInviteMode(void);
 		bool getTopicMode(void);
+		std::string	getModeString(void);
 		
 		void setPass(std::string);
 		void setTopic(std::string);
-		void setUsrerLimit(uint32_t);
+		void setUserLimit(size_t);
 		void setInviteMode(bool);
 		void setTopicMode(bool);
 		

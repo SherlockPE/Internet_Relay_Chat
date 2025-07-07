@@ -6,6 +6,9 @@
 Channel::Channel(const std::string &channel_name, const std::string &channel_pass)
 : _channel_name(channel_name), _password(channel_pass)
 {
+	_user_limit = 0;
+	_invite_mode = false;
+	_topic_mode = false;
 	std::cout << GREEN "Channel default constructor called" NC << std::endl;
 }
 
@@ -83,9 +86,15 @@ std::string	Channel::getModeString(void)
 	if (!_password.empty())
 		result += "k";
 	if (_user_limit)
-		result += "l " + to_string(_user_limit);
+		result += "l";
 	if (!result.empty())
+	{
 		result.insert(0,"+");
+		if (result.find('k') != std::string::npos)
+			result += ' ' + _password;
+		if (result.find('l') != std::string::npos)
+			result += ' ' + to_string(_user_limit);
+	}
 	return result;
 }
 

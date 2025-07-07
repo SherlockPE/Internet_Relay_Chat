@@ -201,7 +201,7 @@ static bool	check_mode_str(std::string mode_string)
 {
 	if (mode_string[0] != '-' && mode_string[0] != '+')
 		return true;
-	if (mode_string.back() == '+' || mode_string.back() == '-')
+	if (mode_string.at(mode_string.size() - 1) == '+' || mode_string.at(mode_string.size() - 1) == '-')
 		return true;
 	if (mode_string.find_first_not_of("itkol+-") != std::string::npos)
 		return true;
@@ -224,7 +224,12 @@ static void	remove_modes(std::string &modes_to_remove, Channel &chan, Client &cl
 	std::string mode_param;
 	size_t	pos;
 
+	std::cout << "Modes to remove: " + modes_to_remove + "\n";
+	std::cout << "Params: " + params + "\n";
+
 	for (size_t n = 1; n < modes_to_remove.size(); n++) {
+		std::cout << "Mode to remove: " + to_string(modes_to_remove[n]) + "\n";
+		std::cout << "Params: " + params + "\n";
 		if (modes_to_remove[n] == 'i') {
 			chan.setInviteMode(false);
 		}
@@ -264,7 +269,12 @@ static void	add_modes(std::string &modes_to_add, Channel &chan, Client &client, 
 	size_t	pos;
 	size_t	user_limit;
 
+	std::cout << "Modes to add: " + modes_to_add + "\n";
+	std::cout << "Params: " + params + "\n";
+	
 	for (size_t n = 1; n < modes_to_add.size(); n++) {
+		std::cout << "Mode to add: " + to_string(modes_to_add[n]) + "\n";
+		std::cout << "Params: " + params + "\n";
 		if (modes_to_add[n] == 'i') {
 			chan.setInviteMode(true);
 		}
@@ -343,14 +353,18 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 	size_t pos = params.find(' ');
 	dest_chan = params.substr(0, pos);
 	if (pos == std::string::npos)
-		return;
-	params.erase(0, pos + 1);
-	
-	pos = params.find(' ');
-	if (pos < std::string::npos)
-	{
-		mode_string = params.substr(0, pos);
+		params.erase();
+	else
 		params.erase(0, pos + 1);
+	
+	if (!params.empty())
+	{
+		pos = params.find(' ');
+		mode_string = params.substr(0, pos);
+		if (pos == std::string::npos)
+			params.erase();
+		else
+			params.erase(0, pos + 1);
 	}
 
 	for (size_t i = 0; i < _channels.size(); i++)
@@ -363,6 +377,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 442);
 				return;
 			}
+			std::cout << "Is member\n";
 			if (mode_string.empty())
 			{
 				// RPL_CHANNELMODIS (324)
@@ -371,12 +386,14 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 324);
 				return;
 			}
-			if (_channels[i].isOperator(client_nick))
+			std::cout << "Modes to set\n";
+			if (!_channels[i].isOperator(client_nick))
 			{
 				msg = dest_chan + " :You're not channel operator";
 				_clients[client_i].sendToClient(msg, 482);
 				return;
 			}
+			std::cout << "Is operator\n";
 			// ERR_INVALIDMODEPARAM (696)
 			// "<client> <target chan/user> <mode char> <parameter> :<description>"
 			if (check_mode_str(mode_string))
@@ -385,12 +402,13 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 696);
 				return;
 			}
-			if (mode_string[0] != '-')
+			std::cout << "Modes string is valid\n";
+			if (mode_string[0] == '-')
 			{
 				pos = mode_string.find('+');
 				modes_to_remove = mode_string.substr(0, pos);
 				if (pos < std::string::npos)
-					modes_to_add = mode_string.substr(pos + 1);
+					modes_to_add = mode_string.substr(pos);
 				remove_modes(modes_to_remove, _channels[i], _clients[client_i], dest_chan, params);
 				add_modes(modes_to_add, _channels[i], _clients[client_i], dest_chan, params);				
 			}
@@ -399,7 +417,7 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 				pos = mode_string.find('-');
 				modes_to_add = mode_string.substr(0, pos);
 				if (pos < std::string::npos)
-					modes_to_remove = mode_string.substr(pos + 1);
+					modes_to_remove = mode_string.substr(pos);
 				add_modes(modes_to_add, _channels[i], _clients[client_i], dest_chan, params);
 				remove_modes(modes_to_remove, _channels[i], _clients[client_i], dest_chan, params);
 			}

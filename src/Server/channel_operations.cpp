@@ -155,7 +155,7 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 	
 	pos = params.find(' ');
 	dest_chan = params.substr(0, pos);
-	if (pos == std::string::npos)
+	if (dest_chan.empty())
 		return;
 
 	for (size_t i = 0; i < _channels.size(); i++)
@@ -182,15 +182,16 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 443);
 				return;
 			}
-			msg = ":" + client_nick + " INVITE " + dest_client + dest_chan;
+			msg = ":" + client_nick + " INVITE " + dest_client + " " + dest_chan + "\r\n";
 			size_t n = search_client_by_name(dest_client);
 			if (n < _clients.size())
 			{
 				_clients[n].addInvite(dest_chan);
 				send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
 			}
-			msg = dest_client + dest_chan;
+			msg = dest_client + " " + dest_chan;
 			_clients[client_i].sendToClient(msg, 341);
+			return;
 		}
 		msg = dest_chan + " :No such channel";
 		_clients[client_i].sendToClient(msg, 403);
@@ -304,10 +305,10 @@ static void	add_modes(std::string &modes_to_add, Channel &chan, Client &client, 
 			else
 				params.erase(0, pos + 1);
 
-			if (chan.isOperator(mode_param))
-				chan.erraseOperator(mode_param);
+			if (!chan.isOperator(mode_param))
+				chan.addOperator(mode_param);
 			else {
-				msg = dest_chan + " +o " + mode_param + " :User is not an operator";
+				msg = dest_chan + " +o " + mode_param + " :User an operator";
 				client.sendToClient(msg, 696);
 			}
 		}
@@ -511,9 +512,11 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 
 		for (size_t i = 0; i < _channels.size(); i++) {
 			if (it->first == _channels[i].getName()) {
+				std::cout << RED << "Members in chan " << _channels[i].getName() << ": " << _channels[i].getMemberNum()
+						 << " User limit: " << _channels[i].getUserLimit() << "\n";
 				if (_channels[i].isMember(client_nick))
 					std::cout << RED << "Channel " << it->first << " already joined" << NC << "\n";
-				else if (_channels[i].getMemberNum() >= _channels[i].getUserLimit())
+				else if (_channels[i].getUserLimit() > 0 && _channels[i].getMemberNum() >= _channels[i].getUserLimit())
 				{
 					std::cout << RED << command << " ERR_CHANNELISFULL (471)" << NC << "\n";
 					msg = ":42.irc 471 " + name + " " + it->first + " :Cannot join channel, user limit reached\r\n";
@@ -530,6 +533,7 @@ void	Server::_JOIN(std::string command, std::string params, size_t client_i)
 					std::cout << RED << command << " ERR_INVITEONLYCHAN (473)" << NC << "\n";
 					msg = ":42.irc 473 " + name + " " + it->first + " :Cannot join channel, invite needed\r\n";
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+					std::cout << msg;
 				}
 				else
 				{

@@ -70,32 +70,36 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 	std::string new_topic;
 	std::string old_topic;
 	std::string	client_nick = _clients[client_i].getNick();
-	bool	show_topic = false;
-	bool	is_oper;
-	bool	oper_needed;
+	bool		show_topic = false;
+	bool		is_oper;
+	bool		oper_needed;
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
 
 	size_t pos = params.find(' ');
-	if (pos == std::string::npos)
-		return;
+	// if (pos == std::string::npos)
 	dest_chan = params.substr(0, pos);
 	params.erase(0, pos + 1);
+	if (params.empty())
+		return;
 
 	pos = params.find(' ');
-	new_topic = params.substr(0, pos);
-	if (pos == std::string::npos)
+	new_topic = params.substr(1, pos);
+	if (new_topic.empty())
 		show_topic = true;
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
+		std::cout << "El valor de topic es -->" << show_topic << "\n";
 		if ((_channels[i].getName() == dest_chan))
 		{
+			std::cout << "Holaaaaaaaaaaaa22222222\n";
 			old_topic = _channels[i].getTopic();
-			if (show_topic)
+			if (show_topic)// ??????????????????????
 			{
-				if (old_topic.empty())
+				std::cout << "hola33333333333333333333333\n";
+				if (old_topic == DEFAULT_TOPIC)
 				{
 					// RPL_NOTOPIC (331)
 					msg = dest_chan + " :No topic is set";
@@ -107,10 +111,12 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 					msg = dest_chan + " :" + old_topic;
 					_clients[client_i].sendToClient(msg, 332);
 				}
+				std::cout << "Chauuuuuuuuuuuu\n";
 				return;
 			}
+			std::cout << "TESTTT\n";
 			if (new_topic == old_topic)
-				return;
+			return;
 			is_oper = _channels[i].isOperator(client_nick);
 			oper_needed = _channels[i].getTopicMode();
 			if (oper_needed && !is_oper)
@@ -119,6 +125,7 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 482);
 				return;
 			}
+			std::cout << "Adding topicccccccccccccccc\n";
 			_channels[i].setTopic(new_topic);
 			msg = ":42.irc TOPIC " + dest_chan + " :" + new_topic;
 			for (size_t n = 0; n < _clients.size(); n++) {

@@ -6,6 +6,7 @@
 Channel::Channel(const std::string &channel_name, const std::string &channel_pass)
 : _channel_name(channel_name), _password(channel_pass)
 {
+	_topic = DEFAULT_TOPIC;
 	_user_limit = 0;
 	_invite_mode = false;
 	_topic_mode = false;

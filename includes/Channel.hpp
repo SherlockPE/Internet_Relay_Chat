@@ -19,7 +19,7 @@
 
 #ifndef _CHANNEL_HPP
 # define _CHANNEL_HPP
-
+# define DEFAULT_TOPIC "default_topic"
 #include <string>
 #include <vector>
 #include <algorithm>

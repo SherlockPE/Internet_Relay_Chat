@@ -30,7 +30,14 @@ void	Server::_PASS(std::string command, std::string params, size_t client_i)
 	}
 	_clients[client_i].setPass(params);
 }
+static bool is_invalid(unsigned char c) {
+    std::string	invalid_chars(".=#&%$@:/\\ \t\n");
 
+	if (invalid_chars.find(c) != std::string::npos)
+		return true;
+
+	return !std::isprint(c);
+}
 void	Server::_NICK(std::string command, std::string params, size_t client_i)
 {
 	std::string	msg;
@@ -45,7 +52,7 @@ void	Server::_NICK(std::string command, std::string params, size_t client_i)
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
-	if (params.find("=#&%$@:") != std::string::npos)
+	if (std::count_if(params.begin(), params.end(), is_invalid))
 	{
 		std::cout << RED << command << " ERR_ERRONEUSNICKNAME (432)" << NC << "\n";
 		msg = ":42.irc 432 " + client_nick + " " + client_nick + " :Erroneus nickname\r\n";
@@ -60,6 +67,17 @@ void	Server::_NICK(std::string command, std::string params, size_t client_i)
 		return;
 	}
 	_clients[client_i].setNick(params);
+	msg = ":" + client_nick + " NICK " + params + "\r\n";
+	// msg = ":42.irc NICK " + client_nick + " " + params + "\r\n";
+	send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+	for (size_t i = 0; i < _client_nicks.size(); i++)
+	{
+		if (_client_nicks[i] == client_nick)
+		{
+			_client_nicks[i] = params;
+			return;
+		}
+	}
 }
 
 // TODO: parse the user params (optional)

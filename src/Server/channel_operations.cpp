@@ -79,44 +79,44 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
 
 	size_t pos = params.find(' ');
-	// if (pos == std::string::npos)
 	dest_chan = params.substr(0, pos);
-	params.erase(0, pos + 1);
-	if (params.empty())
+	if (pos == std::string::npos)
+		params.erase();
+	else
+		params.erase(0, pos + 1);
+	if (dest_chan.empty())
 		return;
-
-	pos = params.find(' ');
-	new_topic = params.substr(1, pos);
-	if (new_topic.empty())
+	if (!params.empty())
+		new_topic = params.substr(1);
+	else
 		show_topic = true;
+
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		std::cout << "El valor de topic es -->" << show_topic << "\n";
 		if ((_channels[i].getName() == dest_chan))
 		{
-			std::cout << "Holaaaaaaaaaaaa22222222\n";
 			old_topic = _channels[i].getTopic();
-			if (show_topic)// ??????????????????????
+			if (show_topic)
 			{
-				std::cout << "hola33333333333333333333333\n";
-				if (old_topic == DEFAULT_TOPIC)
+				if (old_topic.empty())
 				{
 					// RPL_NOTOPIC (331)
+					std::cout << "Old topic is empty\n";
 					msg = dest_chan + " :No topic is set";
 					_clients[client_i].sendToClient(msg, 331);
 				}
 				else
 				{
 					// RPL_TOPIC (332)
+					std::cout << "Old topic is NOT empty\n";
 					msg = dest_chan + " :" + old_topic;
 					_clients[client_i].sendToClient(msg, 332);
 				}
-				std::cout << "Chauuuuuuuuuuuu\n";
 				return;
 			}
-			std::cout << "TESTTT\n";
 			if (new_topic == old_topic)
-			return;
+				return;
 			is_oper = _channels[i].isOperator(client_nick);
 			oper_needed = _channels[i].getTopicMode();
 			if (oper_needed && !is_oper)
@@ -125,9 +125,8 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 482);
 				return;
 			}
-			std::cout << "Adding topicccccccccccccccc\n";
 			_channels[i].setTopic(new_topic);
-			msg = ":42.irc TOPIC " + dest_chan + " :" + new_topic;
+			msg = ":42.irc TOPIC " + dest_chan + " :" + new_topic + "\r\n";
 			for (size_t n = 0; n < _clients.size(); n++) {
 				if (_channels[i].isMember(_clients[n].getNick()))
 					send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
@@ -189,20 +188,23 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 				_clients[client_i].sendToClient(msg, 443);
 				return;
 			}
-			msg = ":" + client_nick + " INVITE " + dest_client + " " + dest_chan + "\r\n";
 			size_t n = search_client_by_name(dest_client);
-			if (n < _clients.size())
+			if (n == _clients.size())
 			{
-				_clients[n].addInvite(dest_chan);
-				send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
+				msg = dest_client + " " + dest_chan + " :They aren't on that channel";
+				_clients[client_i].sendToClient(msg, 441);
+				return;
 			}
+			msg = ":" + client_nick + " INVITE " + dest_client + " " + dest_chan + "\r\n";
+			_clients[n].addInvite(dest_chan);
+			send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
 			msg = dest_client + " " + dest_chan;
 			_clients[client_i].sendToClient(msg, 341);
 			return;
 		}
-		msg = dest_chan + " :No such channel";
-		_clients[client_i].sendToClient(msg, 403);
 	}
+	msg = dest_chan + " :No such channel";
+	_clients[client_i].sendToClient(msg, 403);
 }
 
 static bool	check_mode_str(std::string mode_string)
@@ -431,9 +433,9 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 			}
 			return;
 		}
-		msg = dest_chan + " :No such channel";
-		_clients[client_i].sendToClient(msg, 403);
 	}
+	msg = dest_chan + " :No such channel";
+	_clients[client_i].sendToClient(msg, 403);
 }
 
 // TODO: inprove parsing (optional)

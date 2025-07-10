@@ -51,6 +51,7 @@ class Client
 		void close_socket(void);
 
 		std::string getNick(void) const;
+		std::string getUser(void) const;
 		bool getReg(void) const;
 
 		bool isInvited(std::string channel_name);

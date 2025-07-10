@@ -46,6 +46,10 @@ void Client::close_socket(void)
 		<< "Disconected" << NC << "\n";
 }
 
+std::string	Client::getUser(void) const
+{
+	return _user_name;
+}
 std::string	Client::getNick(void) const
 {
 	return _nick_name;

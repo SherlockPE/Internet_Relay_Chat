@@ -38,6 +38,7 @@ class Client
 		std::string	_nick_name;
 		std::string	_user_name;
 		std::string	_real_name;
+		std::string	_buffer;
 		std::vector<std::string>	_invites;
 		bool	_registered;
 
@@ -58,11 +59,14 @@ class Client
 		void addInvite(std::string channel_name);
 		void removeInvite(std::string channel_name);
 
-		void	setPass(const std::string &);
-		void	setNick(const std::string &);
-		void	setUser(const std::string &);
-		void	setRealName(const std::string &);
-		void	sendToClient(const std::string &, size_t);
+		void		setPass(const std::string &);
+		void		setNick(const std::string &);
+		void		setUser(const std::string &);
+		void		setRealName(const std::string &);
+		void		sendToClient(const std::string &, size_t);
+		void		fillBuff(const std::string &);
+		void		clearBuff(void);
+		std::string	readBuff(void);
 
 		bool	_register(const std::vector<std::string> &client_nicks);
 };

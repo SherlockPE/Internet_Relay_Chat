@@ -8,7 +8,7 @@ void    Server::init_commands(void)
 	_coms["USER"] = &Server::_USER;
 	// _coms["PING"] = &Server::_PING;
 	// _coms["PONG"] = &Server::_PONG;
-	_coms["OPER"] = &Server::_OPER;
+	// _coms["OPER"] = &Server::_OPER;
 	// _coms["QUIT"] = &Server::_QUIT;
 	// _coms["ERROR"] = &Server::_ERROR;
 

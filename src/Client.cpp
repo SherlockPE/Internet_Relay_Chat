@@ -39,6 +39,19 @@ Client& Client::operator=(const Client &other)
 
 // METHODS AND MEMBER FUNCTIONS ------------------------------------------------
 
+void	Client::fillBuff(const std::string &append)
+{
+	_buffer += append;
+}
+void	Client::clearBuff(void)
+{
+	_buffer.erase();
+}
+std::string	Client::readBuff(void)
+{
+	return _buffer;
+}
+
 void Client::close_socket(void)
 {
 	close(_poll_data.fd);

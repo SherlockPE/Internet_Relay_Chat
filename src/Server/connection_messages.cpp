@@ -85,6 +85,9 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 {
 	std::string	msg;
 	std::string	client_nick = _clients[client_i].getNick();
+	std::size_t pos;
+	std::string	username;
+	std::string	realname = "realname";
 
 	std::cout << GREEN << "Executing _USER" << NC << "\n";
 
@@ -103,9 +106,18 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 		return;
 	}
 
-	std::string	username = params.substr(0, params.find(" "));
-	std::string	realname = params.substr(params.find(":"));
-
+	pos = params.find(" ");
+	if (pos == std::string::npos)
+	{		
+		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		return;
+	}
+	username = params.substr(0, params.find(" "));
+	pos = params.find(":");
+	if (pos < params.size())
+		realname = params.substr(pos);
 	if (realname == "realname")
 		realname = username;
 
@@ -130,13 +142,13 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 // }
 
 //TODO: Will this message be needed? (optional)
-void	Server::_OPER(std::string command, std::string params, size_t client_i)
-{
-	(void)command;
-	(void)params;
-	(void)client_i;
-	std::cout << GREEN << "Executing _OPER" << NC << "\n";
-}
+// void	Server::_OPER(std::string command, std::string params, size_t client_i)
+// {
+// 	(void)command;
+// 	(void)params;
+// 	(void)client_i;
+// 	std::cout << GREEN << "Executing _OPER" << NC << "\n";
+// }
 
 // void	Server::_QUIT(std::string command, std::string params, size_t client_i)
 // {

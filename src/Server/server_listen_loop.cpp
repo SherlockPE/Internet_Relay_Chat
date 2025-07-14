@@ -11,7 +11,7 @@ void	Server::server_listen_loop(void)
 			std::cout << "Name [" << i << "] " << _client_nicks[i] << "\n";
 		std::cout << WHITE "================================\n" NC;
 
-		number_of_polls = poll(&_pollfds[0], _pollfds.size(), TIMEOUT);  
+		number_of_polls = poll(&_pollfds[0], _pollfds.size(), TIMEOUT);
 		if (number_of_polls == -1)
 			std::cerr << RED << "Error trying to poll the socket" << NC << std::endl;
 		else if (number_of_polls > 0)

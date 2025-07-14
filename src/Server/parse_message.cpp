@@ -42,12 +42,16 @@ void	Server::parse_message(std::string msg, size_t client_i)
 		msg_pos = msg.find("\r\n");
 
 		if (msg_pos == std::string::npos)
+		{
+			_clients[client_i].fillBuff(msg);
 			return;
-
+		}
 		command = msg.substr(0, msg_pos);
+		_clients[client_i].fillBuff(command);
 		msg.erase(0, msg_pos + 2);
-
+		command = _clients[client_i].readBuff();
 		select_command(command, client_i);
+		_clients[client_i].clearBuff();
 	}
 }
 

@@ -47,6 +47,11 @@ CPP = c++
 CPPVER = -std=c++98
 CPPFLAGS = -Wall -Wextra -Werror $(CPPVER) -g3
 
+ifeq ($(tmout),)
+else
+	CPPFLAGS += -D TIMEOUT=$(tmout)
+endif
+
 all: $(NAME)
 
 $(NAME): $(INC) $(OBJ_DIR) $(OBJ)

@@ -40,7 +40,9 @@
 
 #define BUFF_SIZE 4096
 #define QUEUE_SIZE 4096
-#define TIMEOUT 6000
+# ifndef TIMEOUT
+#  define TIMEOUT 6000
+# endif
 
 template<class T> std::string	to_string(const T& value) {
 	std::ostringstream oss;

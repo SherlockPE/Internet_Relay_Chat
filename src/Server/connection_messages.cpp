@@ -66,6 +66,14 @@ void	Server::_NICK(std::string command, std::string params, size_t client_i)
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
+	if (params == client_nick)
+	{
+		std::cout << RED << command << " ERR_NICKNAMEINUSE (433)" << NC << "\n";
+		msg = ":42.irc 433 " + client_nick + " " + client_nick + " :Nickname is already in use\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		return;
+	}
+	// Change NICK
 	_clients[client_i].setNick(params);
 	msg = ":" + client_nick + " NICK " + params + "\r\n";
 	// msg = ":42.irc NICK " + client_nick + " " + params + "\r\n";
@@ -75,9 +83,23 @@ void	Server::_NICK(std::string command, std::string params, size_t client_i)
 		if (_client_nicks[i] == client_nick)
 		{
 			_client_nicks[i] = params;
-			return;
+			break;
 		}
 	}
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i].isMember(client_nick))
+		{
+			std::cout << BOLD <<  "Adding member [" << params << "]\n";
+			_channels[i].addMember(params);
+			if (_channels[i].isOperator(client_nick))
+				_channels[i].addOperator(client_nick);
+			std::cout << BOLD <<  "Removing client [" << client_nick << "]\n";
+			_channels[i].erraseMember(client_nick);
+			break;
+		}
+	}
+	
 }
 
 // TODO: parse the user params (optional)

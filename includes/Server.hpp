@@ -134,8 +134,4 @@ class Server
 		};
 };
 
-
-// UTILS
-void str_toupper(std::string &str);
-
 #endif // !_SERVER_HPP

@@ -45,19 +45,20 @@ class Client
 
 	public:
 		Client(pollfd poll_data, sockaddr address);
-		~Client(void);
 		Client(const Client &);
-		Client& operator=(const Client &);
+		~Client(void);
 
-		void close_socket(void);
+		Client&		operator=(const Client &);
+
+		void		close_socket(void);
 
 		std::string getNick(void) const;
 		std::string getUser(void) const;
-		bool getReg(void) const;
+		bool		getReg(void) const;
 
-		bool isInvited(std::string channel_name);
-		void addInvite(std::string channel_name);
-		void removeInvite(std::string channel_name);
+		bool		isInvited(std::string channel_name);
+		void		addInvite(std::string channel_name);
+		void		removeInvite(std::string channel_name);
 
 		void		setPass(const std::string &);
 		void		setNick(const std::string &);
@@ -68,7 +69,7 @@ class Client
 		void		clearBuff(void);
 		std::string	readBuff(void);
 
-		bool	_register(const std::vector<std::string> &client_nicks);
+		bool		_register(const std::vector<std::string> &client_nicks);
 };
 
 #endif // !_CLIENT_HPP

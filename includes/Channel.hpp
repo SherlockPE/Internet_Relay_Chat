@@ -45,33 +45,33 @@ class Channel
 		Channel(const Channel & other);
 		~Channel(void);
 
-  		Channel& operator=(const Channel & other);
+  		Channel&	operator=(const Channel & other);
 
 
-		std::string getName(void);
-		std::string getPass(void);
-		std::string getTopic(void);
-		size_t getMemberNum(void);
-		size_t getUserLimit(void);
-		bool getInviteMode(void);
-		bool getTopicMode(void);
+		std::string	getName(void);
+		std::string	getPass(void);
+		std::string	getTopic(void);
+		size_t		getMemberNum(void);
+		size_t		getUserLimit(void);
+		bool		getInviteMode(void);
+		bool		getTopicMode(void);
 		std::string	getModeString(void);
 		
-		void setPass(std::string);
-		void setTopic(std::string);
-		void setUserLimit(size_t);
-		void setInviteMode(bool);
-		void setTopicMode(bool);
+		void		setPass(std::string);
+		void		setTopic(std::string);
+		void		setUserLimit(size_t);
+		void		setInviteMode(bool);
+		void		setTopicMode(bool);
 		
-		void addMember(std::string client_nick);
-		void addOperator(std::string client_nick);
+		void		addMember(std::string client_nick);
+		void		addOperator(std::string client_nick);
 		
-		bool erraseMember(std::string client_nick);
-		bool erraseOperator(std::string client_nick);
+		bool		erraseMember(std::string client_nick);
+		bool		erraseOperator(std::string client_nick);
 
-		bool isMember(std::string client_nick);
-		bool isOperator(std::string client_nick);
-		bool isEmpty(void);
+		bool		isMember(std::string client_nick);
+		bool		isOperator(std::string client_nick);
+		bool		isEmpty(void);
 };
 
 #endif // !_CHANNEL_HPP

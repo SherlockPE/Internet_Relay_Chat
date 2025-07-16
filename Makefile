@@ -17,14 +17,11 @@ SERVER_FILES =  Server \
 				channel_operations \
 				messages
 
-UTILS_FILES = str_toupper
 
 SERVER_FILES := $(addprefix $(SERVER_FOLDER)/, $(SERVER_FILES))
-UTILS_FILES := $(addprefix $(UTILS_FOLDER)/, $(UTILS_FILES))
 
 SOURCES =	main \
 			$(SERVER_FILES) \
-			$(UTILS_FILES) \
 			Client \
 			Channel
 

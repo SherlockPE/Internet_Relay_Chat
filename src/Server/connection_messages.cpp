@@ -128,7 +128,7 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 		return;
 	}
 
-	pos = params.find(" ");
+	pos = params.find(' ');
 	if (pos == std::string::npos)
 	{		
 		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
@@ -136,8 +136,15 @@ void	Server::_USER(std::string command, std::string params, size_t client_i)
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
-	username = params.substr(0, params.find(" "));
-	pos = params.find(":");
+	username = params.substr(0, pos);
+	pos = params.find(':');
+	if (pos == std::string::npos)
+	{		
+		std::cout << RED << command << " ERR_NEEDMOREPARAMS (461)" << NC << "\n";
+		msg = ":42.irc 461 " + client_nick + " " + command + " :Not enough parameters\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		return;
+	}
 	if (pos < params.size())
 		realname = params.substr(pos);
 	if (realname == "realname")

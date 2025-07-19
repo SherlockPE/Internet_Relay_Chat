@@ -4,7 +4,8 @@
 void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 {
 	std::string	dest;
-	size_t	dest_pos;
+	std::string	msg_cont;
+	size_t	pos;
 	std::string	msg;
 	std::string	client_nick = _clients[client_i].getNick();
 
@@ -21,14 +22,23 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
-	dest_pos = params.find(' ');
-	if (dest_pos == std::string::npos) {
+	pos = params.find(' ');
+	if (pos == std::string::npos) {
 		std::cout << RED << command << " ERR_NOTEXTTOSEND (412)" << NC << "\n";
 		msg = ":42.irc 412 " + client_nick + " :No text to send\r\n";
 		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 		return;
 	}
-	dest = params.substr(0, dest_pos);
+	dest = params.substr(0, pos);
+	params.erase(0, pos);
+	pos = params.find(':');
+	if (pos == std::string::npos) {
+		std::cout << RED << command << " ERR_NOTEXTTOSEND (412)" << NC << "\n";
+		msg = ":42.irc 412 " + client_nick + " :No text to send\r\n";
+		send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
+		return;
+	}
+	msg_cont = params.substr(pos);
 	if (dest[0] == '#') {
 		for (size_t i = 0; i < _channels.size(); i++) {
 			if (_channels[i].getName() == dest) {
@@ -38,7 +48,7 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 					return;
 				}
-				msg = ":" + client_nick + " " + command + " " + params + "\r\n";
+				msg = ":" + client_nick + " " + command + " " + msg_cont + "\r\n";
 				for (size_t n = 0; n < _clients.size(); n++) {
 					if (_clients[n].getNick() != client_nick && _channels[i].isMember(_clients[n].getNick()))
 						send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);

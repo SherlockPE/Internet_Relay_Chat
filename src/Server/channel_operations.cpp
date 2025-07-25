@@ -12,7 +12,10 @@ void	Server::_KICK(std::string command, std::string params, size_t client_i)
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
+	{
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
+		return;
+	}
 
 	size_t pos = params.find(' ');
 	if (pos == std::string::npos)
@@ -70,15 +73,19 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 	std::string new_topic;
 	std::string old_topic;
 	std::string	client_nick = _clients[client_i].getNick();
+	size_t		pos;
 	bool		show_topic = false;
 	bool		is_oper;
 	bool		oper_needed;
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
+	{
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
+		return;
+	}
 
-	size_t pos = params.find(' ');
+	pos = params.find(' ');
 	dest_chan = params.substr(0, pos);
 	if (pos == std::string::npos)
 		params.erase();
@@ -86,8 +93,18 @@ void	Server::_TOPIC(std::string command, std::string params, size_t client_i)
 		params.erase(0, pos + 1);
 	if (dest_chan.empty())
 		return;
-	if (!params.empty())
-		new_topic = params.substr(1);
+	if (!params.empty() && params.find_first_not_of(' ') != std::string::npos)
+	{
+		pos = params.find(':');
+		// ERR_UNKNOWNERROR (400)
+		if (pos == std::string::npos)
+		{
+			_clients[client_i].sendToClient(":Invalid topic string", 400);
+			return;
+		}
+		if (pos + 1 < params.size())	
+			new_topic = params.substr(pos + 1);
+	}
 	else
 		show_topic = true;
 
@@ -151,7 +168,10 @@ void	Server::_INVITE(std::string command, std::string params, size_t client_i)
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
+	{
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
+		return;
+	}
 
 	size_t pos = params.find(' ');
 	dest_client = params.substr(0, pos);
@@ -358,7 +378,10 @@ void	Server::_MODE(std::string command, std::string params, size_t client_i)
 
 	std::cout << GREEN << "Executing " << command << NC << "\n";
 	if (params.empty())
+	{
 		_clients[client_i].sendToClient(":Not enough parameters", 461);
+		return;
+	}
 
 	size_t pos = params.find(' ');
 	dest_chan = params.substr(0, pos);

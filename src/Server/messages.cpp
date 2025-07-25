@@ -48,7 +48,7 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 					send(_pollfds[client_i + 1].fd, msg.c_str(), msg.size(), 0);
 					return;
 				}
-				msg = ":" + client_nick + " " + command + " " + msg_cont + "\r\n";
+				msg = ":" + client_nick + " " + command + " " + dest + " " + msg_cont + "\r\n";
 				for (size_t n = 0; n < _clients.size(); n++) {
 					if (_clients[n].getNick() != client_nick && _channels[i].isMember(_clients[n].getNick()))
 						send(_pollfds[n + 1].fd, msg.c_str(), msg.size(), 0);
@@ -63,7 +63,7 @@ void	Server::_PRIVMSG(std::string command, std::string params, size_t client_i)
 	else {
 		for (size_t i = 0; i < _clients.size(); i++) {
 			if (_clients[i].getReg() && _clients[i].getNick() == dest) {
-				msg = ":" + client_nick + " " + command + " " + params + "\r\n";
+				msg = ":" + client_nick + " " + command + " " + dest + " " + msg_cont + "\r\n";
 				send(_pollfds[i + 1].fd, msg.c_str(), msg.size(), 0);
 				return;
 			}
